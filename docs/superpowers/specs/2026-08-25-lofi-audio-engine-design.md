@@ -83,6 +83,8 @@ js/
   main.js                 p5 lifecycle wiring only
   config.js               note table, colours, layout constants
   nyquist.js              score -> Nyquist text (pure function)
+  state.js                shared mutable app state a p5 global-mode sketch
+                           needs (score, selection, transport flags)
   audio/
     AudioEngine.js        public API; owns the pool and the bus
     Voice.js              detuned oscillator stack + filter + envelope
@@ -91,6 +93,7 @@ js/
   score/
     Score.js              grid model (formerly Canvas.js)
     Cell.js               position, colour, selected state — no audio
+    sortedInsert.js       ordered insertion helper (pure)
   ui/
     EnvelopePanel.js      ADSR sliders + graph (formerly Envelope.js)
     Transport.js          play / clear / export buttons and scheduling
@@ -144,9 +147,11 @@ A `Voice` is one playable note. It holds:
 
 Voices are allocated once and reused. `AudioEngine` keeps a pool of 16 and hands
 out the least-recently-used one on `noteOn`; a 17th simultaneous note steals the
-oldest voice. Sixteen voices of three oscillators plus a noise source and a
-filter is roughly 80 audio nodes in total, against 952 today — which is what
-makes a richer voice affordable at all.
+oldest voice. Each voice is 3 oscillators, a noise source, a filter, a
+`noiseGain`, and a `wobbleGain` — 7 p5.sound objects — so the pool alone is
+16 × 7 = 112. Including the shared bus and wobble LFO, 143 p5 sound objects are
+live in the page, against 952 today — which is what makes a richer voice
+affordable at all.
 
 **Resolved by probe (2026-08-25).** A single `p5.Envelope` per voice drives all
 three oscillators *and* the noise source: apply `.amp(env)` to each source, then
@@ -205,12 +210,15 @@ heard directly, modulates voice pitch by a few cents. p5.sound supports passing
 an oscillator to `.freq()` for exactly this. One LFO serves all voices, so the
 whole texture drifts together the way a worn tape does.
 
-Chaining uses `p5.Effect.chain()`, confirmed present in the vendored build,
-rather than hand-wiring `.process()` calls.
+Chaining hand-wires `.process()`/`.connect()` calls rather than using
+`p5.Effect.chain()` (confirmed present in the vendored build, but not used
+here): the delay's parallel send described above cannot be expressed with
+`chain()`, which only builds a strict series path.
 
 ### Sound parameters as data
 
-`presets.js` holds every sound number as plain exported data:
+`presets.js` holds every sound number as plain exported data. Illustrative,
+not exhaustive — see the file itself for the full, current list:
 
 ```js
 export const VOICE = {
@@ -227,7 +235,7 @@ export const BUS = {
   delayFeedback: 0.35,
   reverbSeconds: 3.4,
   reverbDecay: 2.0,
-  crackleLevel: 0.02,
+  crackleLevel: 0.015,
   // ...
 };
 ```
@@ -285,10 +293,10 @@ no-behaviour-change move:
 No npm, no build step. `tests.html` imports the pure modules and prints pass/fail
 in the browser, covering the logic that is genuinely coverable:
 
-- `nyquist.js` — score model in, expected Nyquist text out
-- `sortedInsert` — ordering, duplicates, empty and single-element arrays
-- note-name → MIDI → frequency mapping
-- detune maths in `Voice` (cents → frequency ratio)
+- `toNyquist` — score model in, expected Nyquist text out (2 tests)
+- `sortedInsert` — ordering, duplicates, empty and single-element arrays (3 tests)
+- `scoreDurationSeconds` — spans to the final column, not the note count (3 tests)
+- detune maths in `Voice` (cents → frequency ratio) (4 tests)
 
 Audio and drawing are not unit-testable here without mocking far more than the
 tests would be worth. They are verified by loading the page, driving it, and
