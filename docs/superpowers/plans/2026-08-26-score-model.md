@@ -97,7 +97,7 @@ Remove the line `import { detune } from "./js/audio/Voice.js";` and all four `te
 - [ ] **Step 5: Run the tests**
 
 Open `http://localhost:8899/tests.html`.
-Expected: `9 passed, 0 failed` (12 minus the 4 removed detune tests, plus 1 — recount against what the page prints; the requirement is **0 failed**).
+Expected: `8 passed, 0 failed` — `tests.html` has 12 tests and this task removes the 4 detune ones.
 
 - [ ] **Step 6: Verify by ear**
 
@@ -906,9 +906,14 @@ git commit -m "Make note length audible with a token-guarded note-off"
 - [ ] **Step 1: Add the selector positions to `LAYOUT` in `js/config.js`**
 
 ```js
-  rootX: 1090, rootY: 500,
-  scaleX: 1090, scaleY: 525,
+  rootX: 760, rootY: 470,
+  scaleX: 870, scaleY: 470,
 ```
+
+These sit on the same row as the wave-type radio (x 1090, y 470), left of it and
+above the FFT panel. Do not put them at y >= 500 near x 1090: p5 renders DOM
+controls above the canvas, so they would cover the FFT bars Task 2 just moved
+there.
 
 - [ ] **Step 2: Build the selectors in `createTransport`**
 
