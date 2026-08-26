@@ -45,7 +45,7 @@ function drawHeader() {
   text("Graphical Online Music Interface", width / 2, 50);
   textSize(12);
   textAlign(LEFT);
-  text("logical-stop-time: " + state.logicalStopTime, 90, 383);
+  text("logical-stop-time: " + state.logicalStopTime, 90, LAYOUT.sliderY - 7);
   if (!state.score) {
     rectMode(CENTER);
     fill(COLORS.content, 20);

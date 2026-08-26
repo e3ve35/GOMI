@@ -22,11 +22,11 @@ export const GRID = {
 };
 
 export const LAYOUT = {
-  fftX: 0.65, fftY: 310, fftWidth: 200, fftHeight: 170,
-  ampX: 0.1, ampY: 0.75, ampRadius: 100,
-  envX: 0.25, envY: 0.65, envWidth: 350, envHeight: 170,
-  radioX: 1090, radioY: 400,
-  sliderX: 40, sliderY: 390,
+  fftX: 0.65, fftY: 500, fftWidth: 200, fftHeight: 150,
+  ampX: 0.1, ampY: 0.81, ampRadius: 80,
+  envX: 0.25, envY: 0.677, envWidth: 350, envHeight: 150,
+  radioX: 1090, radioY: 470,
+  sliderX: 40, sliderY: 462,
 };
 
 export function colorForWave(waveType) {

@@ -29,8 +29,8 @@ function drawSpectrum() {
 
   for (var i = 0; i < spectrum.length; i++) {
     var x = map(i, 0, spectrum.length, 0, fftWidth);
-    var h = map(spectrum[i], 0, 255, fftHeight, 0);
-    rect(x, fftHeight, fftWidth / spectrum.length, h);
+    var h = map(spectrum[i], 0, 255, 0, fftHeight);
+    rect(x, fftHeight - h, fftWidth / spectrum.length, h);
   }
 
   noStroke();
