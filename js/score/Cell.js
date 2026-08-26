@@ -1,6 +1,7 @@
 import { state } from "../state.js";
 import { colorForWave } from "../config.js";
 import { sortedInsert } from "./sortedInsert.js";
+import { audio } from "../audio/AudioEngine.js";
 
 export class Cell {
   constructor(row, col, x, y, freq = 440) {
@@ -13,28 +14,9 @@ export class Cell {
     this.maxR = this.r * 2;
     this.selected = false;
     this.freq = freq;
-    // create sound wave
-    this.wave = new p5.Oscillator();
-    this.env = new p5.Env();
     this.waveType = "sine";
-    this.wave.setType(this.waveType);
     this.color = "#C6D8AF";
     this.playing = false;
-  }
-
-  play() {
-    this.env.setADSR(
-      state.envelopePanel.attackTime,
-      state.envelopePanel.decayTime,
-      state.envelopePanel.sustainLevel,
-      state.envelopePanel.releaseTime
-    );
-    this.env.setRange(state.envelopePanel.attackLevel, state.envelopePanel.releaseLevel);
-    this.wave.setType(this.waveType);
-    this.wave.start();
-    this.wave.amp(this.env);
-    this.wave.freq(this.freq);
-    this.env.play();
   }
 
   drawSelf() {
@@ -82,7 +64,7 @@ export function handleMousePressed() {
       // represent different wave types with different colors on canvas
       state.currentCell.color = colorForWave(state.radio.value());
       state.currentCell.waveType = state.radio.value();
-      state.currentCell.play();
+      audio.noteOn(state.currentCell.freq, state.currentCell.waveType);
       state.currentCell.selected = true;
       sortedInsert(state.selectedCells, state.currentCell);
     }

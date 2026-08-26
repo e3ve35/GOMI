@@ -36,6 +36,17 @@ export class EnvelopePanel {
     this.sustainLevelSlider.position(this.sliderX, this.sliderY + 100);
   }
 
+  values() {
+    return {
+      attackTime: this.attackSlider.value(),
+      decayTime: this.decaySlider.value(),
+      sustainLevel: this.sustainLevelSlider.value(),
+      releaseTime: this.releaseSlider.value(),
+      attackLevel: this.attackLevelSlider.value(),
+      releaseLevel: this.releaseLevel,
+    };
+  }
+
   drawSelf() {
     this.attackTime = this.attackSlider.value();
     this.decayTime = this.decaySlider.value();

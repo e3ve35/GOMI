@@ -2,6 +2,7 @@ import { Score } from "../score/Score.js";
 import { toNyquist, downloadText } from "../nyquist.js";
 import { COLORS, GRID, LAYOUT, NOTES } from "../config.js";
 import { state } from "../state.js";
+import { audio } from "../audio/AudioEngine.js";
 
 let playButton;
 let createCanvasButton;
@@ -68,7 +69,7 @@ export function playScore() {
     // Schedule the notes
     state.selectedCells.forEach((cell) => {
       setTimeout(() => {
-        cell.play();
+        audio.noteOn(cell.freq, cell.waveType);
         cell.playing = true;
         setTimeout(() => {
           cell.playing = false;

@@ -5,6 +5,7 @@ import { createTransport } from "./ui/Transport.js";
 import { createVisualizers, drawVisualizers } from "./ui/Visualizers.js";
 import { COLORS, LAYOUT } from "./config.js";
 import { state } from "./state.js";
+import { audio } from "./audio/AudioEngine.js";
 
 let myFont;
 
@@ -15,6 +16,7 @@ window.preload = function () {
 window.setup = function () {
   createCanvas(1425, 738).id("my-score");
   angleMode(DEGREES);
+  audio.init();
   createTransport();
   createVisualizers();
   state.envelopePanel = new EnvelopePanel(
@@ -30,6 +32,7 @@ window.draw = function () {
   drawHeader();
   if (state.score) state.score.drawSelf();
   state.envelopePanel.drawSelf();
+  audio.setEnvelope(state.envelopePanel.values());
   drawVisualizers();
 };
 
