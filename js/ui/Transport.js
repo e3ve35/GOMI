@@ -6,13 +6,36 @@ import { Scale, SCALES, midiName } from "../score/Scale.js";
 import { remapRows } from "../score/Note.js";
 import { audio } from "../audio/AudioEngine.js";
 
-let playButton;
 let createCanvasButton;
-let generateScoreButton;
-let clearButton;
 let slider;
 let rootSelect;
 let scaleSelect;
+
+// Controls that stay hidden until a score exists. Collected at creation so
+// create() cannot forget to reveal one.
+const hiddenUntilScore = [];
+
+function hideUntilScore(control) {
+  control.hide();
+  hiddenUntilScore.push(control);
+  return control;
+}
+
+function transportButton(label, handler, index) {
+  const button = createButton(label);
+  button.mousePressed(handler);
+  button.position(width - 260, height * (0.66 + index * 0.08));
+  return hideUntilScore(button);
+}
+
+function transportSelect(addOptions, selected, x, y, handler) {
+  const select = createSelect();
+  addOptions(select);
+  select.selected(selected);
+  select.position(x, y);
+  select.changed(handler);
+  return hideUntilScore(select);
+}
 
 // Everything playScore schedules, so it can be cancelled mid-run.
 let scheduled = [];
@@ -38,46 +61,33 @@ export function createTransport() {
   state.radio.style("color", "white");
   state.radio.style("background-color", COLORS.sine + "50");
   state.radio.changed(changeRadio);
-  state.radio.hide();
+  hideUntilScore(state.radio);
 
   // root and scale selectors
-  rootSelect = createSelect();
-  for (let midi = 48; midi < 60; midi++) rootSelect.option(midiName(midi), midi);
-  rootSelect.selected("48");
-  rootSelect.position(LAYOUT.rootX, LAYOUT.rootY);
-  rootSelect.changed(changeScale);
-  rootSelect.hide();
+  rootSelect = transportSelect(
+    (sel) => {
+      for (let midi = 48; midi < 60; midi++) sel.option(midiName(midi), midi);
+    },
+    "48", LAYOUT.rootX, LAYOUT.rootY, changeScale
+  );
 
-  scaleSelect = createSelect();
-  for (const name of Object.keys(SCALES)) scaleSelect.option(name);
-  scaleSelect.selected("major");
-  scaleSelect.position(LAYOUT.scaleX, LAYOUT.scaleY);
-  scaleSelect.changed(changeScale);
-  scaleSelect.hide();
+  scaleSelect = transportSelect(
+    (sel) => {
+      for (const name of Object.keys(SCALES)) sel.option(name);
+    },
+    "major", LAYOUT.scaleX, LAYOUT.scaleY, changeScale
+  );
 
   // create button
   createCanvasButton = createButton("click to create a score");
   createCanvasButton.mousePressed(create);
   createCanvasButton.position(width / 2 - 100, height * 0.3);
 
-  // play button
-  var buttonX = width - 260;
-  playButton = createButton("play");
-  playButton.mousePressed(playScore);
-  playButton.position(buttonX, height * 0.66);
-  playButton.hide();
-
-  // clear button
-  clearButton = createButton("clear");
-  clearButton.mousePressed(clearCanvas);
-  clearButton.position(buttonX, height * 0.74);
-  clearButton.hide();
-
-  // generate score button
-  generateScoreButton = createButton("generate nyquist score");
-  generateScoreButton.mousePressed(generateScore);
-  generateScoreButton.position(buttonX, height * 0.82);
-  generateScoreButton.hide();
+  [
+    ["play", playScore],
+    ["clear", clearCanvas],
+    ["generate nyquist score", generateScore],
+  ].forEach(([label, handler], i) => transportButton(label, handler, i));
 }
 
 export function scoreDurationSeconds(notes, secondsPerCol) {
@@ -126,16 +136,10 @@ export function playScore() {
 }
 
 function create() {
-  if (!state.score) {
-    state.score = new Score(GRID.topY);
-    createCanvasButton.hide();
-    state.radio.show();
-    rootSelect.show();
-    scaleSelect.show();
-    playButton.show();
-    clearButton.show();
-    generateScoreButton.show();
-  }
+  if (state.score) return;
+  state.score = new Score(GRID.topY);
+  createCanvasButton.hide();
+  hiddenUntilScore.forEach((control) => control.show());
 }
 
 function clearCanvas() {
