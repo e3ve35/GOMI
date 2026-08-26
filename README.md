@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://33v335.com/music/" rel="noopener">
+  <a href="https://e3ve35.github.io/GOMI/" rel="noopener">
  <img style="border-radius: 50%; width: 200px; height: 200px;" src="images/logo.png" alt="Project logo"></a>
 </p>
 
@@ -8,15 +8,15 @@
 <div align="center">
 
 [![Status](https://img.shields.io/badge/status-active-success.svg)]()
-[![GitHub Issues](https://img.shields.io/github/issues/kylelobo/The-Documentation-Compendium.svg)](https://github.com/zhixuanevelynwu/GOMI/issues)
-[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/kylelobo/The-Documentation-Compendium.svg)](https://github.com/zhixuanevelynwu/GOMI/pulls)
+[![GitHub Issues](https://img.shields.io/github/issues/kylelobo/The-Documentation-Compendium.svg)](https://github.com/e3ve35/GOMI/issues)
+[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/kylelobo/The-Documentation-Compendium.svg)](https://github.com/e3ve35/GOMI/pulls)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
 
 </div>
 
 ---
 
-<p align="center"> <a href="https://33v335.com/music/">An interactive composition tool</a>
+<p align="center"> <a href="https://e3ve35.github.io/GOMI/">An interactive composition tool</a>
     <br> 
 </p>
 
@@ -33,13 +33,13 @@
 
 ## 🧐 About <a name = "about"></a>
 
-The [Graphical Online Music Interface](https://33v335.com/music/) is a website that enables users to create music compositions through visual interactions. The goal of this project is to simplify the process of composing and adjusting computer music scores by visualizing sound synthesis parameters and providing real-time audible feedback. My motivation for starting this project was to enhance the user experience of computer music composition and make it more accessible for everyone.
+The [Graphical Online Music Interface](https://e3ve35.github.io/GOMI/) is a website that enables users to create music compositions through visual interactions. The goal of this project is to simplify the process of composing and adjusting computer music scores by visualizing sound synthesis parameters and providing real-time audible feedback. My motivation for starting this project was to enhance the user experience of computer music composition and make it more accessible for everyone.
 
 ## 🏁 How to Use <a name = "how-to-use"></a>
 Here is a short [video](https://drive.google.com/file/d/1C2H45D9KcqhJANld2xrkzmR-PqM5Wae2/view?usp=sharing) demonstrating how to use the interface.
 
 The following instructions will walk you through how to use and comprehend each part of GOMI.
-  - First, follow this [link](https://33v335.com/music/) to access the interface.
+  - First, follow this [link](https://e3ve35.github.io/GOMI/) to access the interface.
   ### Canvas
   - The upper half of the page consists of a canvas. To start your composition, click on the "click to create a score" button. 
     <p align="center">
@@ -99,7 +99,7 @@ The following instructions will walk you through how to use and comprehend each 
       }
 ## ✍️ Author <a name = "author"></a>
 
-- [@zhixuanevelynwu](https://github.com/zhixuanevelynwu) - Idea & Initial work
+- [@e3ve35](https://github.com/e3ve35) - Idea & Initial work
 
 ## 🎉 Acknowledgements <a name = "acknowledgement"></a>
 
