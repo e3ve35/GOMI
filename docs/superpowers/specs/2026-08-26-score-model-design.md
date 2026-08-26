@@ -153,14 +153,15 @@ New band (all below y=470):
 | Envelope panel | x `width*0.25`, y 500, 350x150 |
 | Amplitude | centre (`width*0.1`, 600), radius 80 |
 | FFT | x `width*0.65`, y 500, 200x150 |
-| Buttons | x `width-260`, y 500 / 545 / 590 |
+| Buttons | unchanged, y `height*0.66/0.74/0.82` (487/546/605) |
 
-Two one-line fixes are in scope because the move forces touching this code:
+One one-line fix is in scope because the move forces touching this code:
 
 - FFT: `h = map(spectrum[i], 0, 255, 0, fftHeight)`, `rect(x, fftHeight - h, w, h)`
-- Amplitude: prefill `amphistory` with 360 zeros. It currently reads
-  `amphistory[i]` for i up to 359 before the array is that long, so `map(undefined, ...)`
-  yields NaN vertices and the circle does not render.
+
+The amplitude circle needs no fix. `createVisualizers` already prefills
+`amphistory` with 360 zeros, so the NaN-vertex bug that exists on `main` was
+fixed when the visualizers were extracted.
 
 ## Rendering
 
