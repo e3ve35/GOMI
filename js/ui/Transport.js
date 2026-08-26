@@ -11,7 +11,7 @@ let slider;
 
 export function createTransport() {
   // ioi control slider
-  slider = createSlider(0, 100, 50);
+  slider = createSlider(5, 100, 50);
   slider.position(LAYOUT.sliderX, LAYOUT.sliderY);
   state.logicalStopTime = slider.value() / 100;
   slider.input(() => {
@@ -56,6 +56,12 @@ export function createTransport() {
   generateScoreButton.hide();
 }
 
+export function scoreDurationSeconds(selected, logicalStopTime) {
+  if (selected.length === 0) return 0;
+  const lastCol = Math.max(...selected.map((c) => c.col));
+  return (lastCol + 1) * logicalStopTime;
+}
+
 export function playScore() {
   if (state.score && !state.playing) {
     state.playing = true;
@@ -71,7 +77,7 @@ export function playScore() {
     });
     setTimeout(() => {
       state.playing = false;
-    }, state.selectedCells.length * state.logicalStopTime * 1000);
+    }, scoreDurationSeconds(state.selectedCells, state.logicalStopTime) * 1000);
   }
 }
 

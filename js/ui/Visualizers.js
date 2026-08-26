@@ -6,6 +6,8 @@ const amphistory = [];
 export function createVisualizers() {
   fft = new p5.FFT(0, 32);
   amp = new p5.Amplitude();
+  amphistory.length = 0;
+  for (let i = 0; i < 360; i++) amphistory.push(0);
 }
 
 export function drawVisualizers() {

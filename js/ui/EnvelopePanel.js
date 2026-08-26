@@ -8,7 +8,6 @@ export class EnvelopePanel {
     this.h = h;
     this.attackTime = 0.1;
     this.decayTime = 0.2;
-    this.sustainTime = 0.5;
     this.releaseTime = 1;
 
     this.attackLevel = 1;
@@ -27,23 +26,19 @@ export class EnvelopePanel {
     this.decaySlider = createSlider(0, 1, this.decayTime, 0.01);
     this.decaySlider.position(this.sliderX, this.sliderY + 20);
 
-    this.sustainSlider = createSlider(0, 1, this.sustainTime, 0.01);
-    this.sustainSlider.position(this.sliderX, this.sliderY + 40);
-
     this.releaseSlider = createSlider(0, 1, this.releaseTime, 0.01);
-    this.releaseSlider.position(this.sliderX, this.sliderY + 60);
+    this.releaseSlider.position(this.sliderX, this.sliderY + 40);
 
     this.attackLevelSlider = createSlider(0, 1, this.attackLevel, 0.01);
-    this.attackLevelSlider.position(this.sliderX, this.sliderY + 100);
+    this.attackLevelSlider.position(this.sliderX, this.sliderY + 80);
 
     this.sustainLevelSlider = createSlider(0, 1, this.sustainLevel, 0.01);
-    this.sustainLevelSlider.position(this.sliderX, this.sliderY + 120);
+    this.sustainLevelSlider.position(this.sliderX, this.sliderY + 100);
   }
 
   drawSelf() {
     this.attackTime = this.attackSlider.value();
     this.decayTime = this.decaySlider.value();
-    this.sustainTime = this.sustainSlider.value();
     this.releaseTime = this.releaseSlider.value();
 
     this.attackLevel = this.attackLevelSlider.value();
@@ -53,7 +48,7 @@ export class EnvelopePanel {
     let l1 = -this.h * this.attackLevel;
     let t2 = max(this.w * this.decayTime, t1);
     let l2 = -this.h * this.sustainLevel;
-    let t3 = max(this.w * this.sustainTime, t2);
+    const t3 = t2 + this.w * 0.25;
     let l3 = l2;
     let t4 = max(this.w * this.releaseTime, t3);
     let l4 = -this.h * this.releaseLevel;
@@ -89,24 +84,19 @@ export class EnvelopePanel {
       this.sliderTextY + 20
     );
     text(
-      "sustainTime: " + this.sustainSlider.value(),
+      "releaseTime: " + this.releaseSlider.value(),
       this.sliderTextX,
       this.sliderTextY + 40
     );
     text(
-      "releaseTime: " + this.releaseSlider.value(),
-      this.sliderTextX,
-      this.sliderTextY + 60
-    );
-    text(
       "attackLevel: " + this.attackLevelSlider.value(),
       this.sliderTextX,
-      this.sliderTextY + 100
+      this.sliderTextY + 80
     );
     text(
       "sustainLevel: " + this.sustainLevelSlider.value(),
       this.sliderTextX,
-      this.sliderTextY + 120
+      this.sliderTextY + 100
     );
 
     pop();

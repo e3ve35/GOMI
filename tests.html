@@ -13,6 +13,7 @@
       import { toNyquist } from "./js/nyquist.js";
       import { NOTES } from "./js/config.js";
       import { sortedInsert } from "./js/score/sortedInsert.js";
+      import { scoreDurationSeconds } from "./js/ui/Transport.js";
 
       let passed = 0, failed = 0;
       const out = document.getElementById("out");
@@ -60,6 +61,21 @@
         const arr = [{ x: 2 }, { x: 2 }];
         sortedInsert(arr, { x: 2 });
         eq(arr.length, 3);
+      });
+
+      test("scoreDurationSeconds uses the last column, not the note count", () => {
+        const stacked = [
+          { col: 0 }, { col: 0 }, { col: 0 }, { col: 0 }, { col: 0 },
+        ];
+        eq(scoreDurationSeconds(stacked, 0.5), 0.5);
+      });
+
+      test("scoreDurationSeconds spans to the final column", () => {
+        eq(scoreDurationSeconds([{ col: 4 }, { col: 0 }], 0.5), 2.5);
+      });
+
+      test("scoreDurationSeconds of an empty score is zero", () => {
+        eq(scoreDurationSeconds([], 0.5), 0);
       });
 
       out.innerHTML += `<h2 class="${failed ? "fail" : "pass"}">${passed} passed, ${failed} failed</h2>`;
