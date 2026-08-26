@@ -7,16 +7,16 @@ export const VOICE = {
 };
 
 export const BUS = {
-  lowpassHz: 20000,
-  distortionAmount: 0,
-  delayTimeSec: 0,
-  delayFeedback: 0,
-  delayFilterHz: 2000,
-  reverbSeconds: 0.01,
-  reverbDecay: 0.1,
-  reverbDryWet: 0,
-  crackleLevel: 0,
+  lowpassHz: 3200,
+  distortionAmount: 0.04,
+  delayTimeSec: 0.28,
+  delayFeedback: 0.35,
+  delayFilterHz: 1600,
+  reverbSeconds: 3.4,
+  reverbDecay: 2.0,
+  reverbDryWet: 0.45,
+  crackleLevel: 0.015,
   wobbleRateHz: 0,
   wobbleDepthCents: 0,
-  outputVolume: 0.6,
+  outputVolume: 0.9,
 };

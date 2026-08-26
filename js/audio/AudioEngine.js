@@ -1,5 +1,6 @@
 import { Voice } from "./Voice.js";
 import { BUS } from "./presets.js";
+import { MasterBus } from "./MasterBus.js";
 
 const POOL_SIZE = 16;
 
@@ -15,7 +16,8 @@ class AudioEngine {
 
   init() {
     outputVolume(BUS.outputVolume);
-    this.destination = undefined; // p5 master
+    this.bus = new MasterBus();
+    this.destination = this.bus.input;
     for (let i = 0; i < POOL_SIZE; i++) this.voices.push(new Voice(this.destination));
   }
 
