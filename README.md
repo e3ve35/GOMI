@@ -45,20 +45,21 @@ The following instructions will walk you through how to use and comprehend each 
     <p align="center">
       <img src="images/canvas1.png" style="height: 150px;" >
     </p>
-  - After that, you will see a canvas which each dot represents a note in your score. The y-axis of the canvas denotes different pitches, while the x-axis of the canvas represents the start time of each note.
+  - After that, you will see a grid of dots. The y-axis denotes pitch and the x-axis denotes time. Each row is a degree of the chosen scale, spanning three octaves, so every dot on the grid is in key.
     <p align="center">
       <img src="images/canvas2.png" style="height: 150px;" >
     </p>
-  - Try clicking on one of the dots. You will hear immediate audio feedback of the selected note.
+  - Press on one of the dots. You will hear the note immediately, and it sounds for as long as you hold the mouse down. Drag to the right before releasing to give the note a length: it grows from a dot into a capsule spanning the columns it covers. A press with no drag makes the shortest possible note.
     <p align="center">
       <img src="images/canvas3.png" style="height: 150px;" >
     </p>
-  - You can switch between different type of waves you want to use in your sound synthesis. There are 4 options: sine, triangle, sawtooth, and square. Select one of them then click on the canvas to hear it - each note is actually a small stack of detuned oscillators plus a touch of noise, run through a shared lo-fi effects chain, so the four wave types color the sound rather than producing starkly different results.
+  - You can switch between different type of waves you want to use in your sound synthesis. There are 4 options: sine, triangle, sawtooth, and square. Select one of them then click on the canvas, you will hear different results.
+  - Two dropdowns next to the wave selector set the root note and the scale (major, minor, dorian, major pentatonic, minor pentatonic). Changing either re-tunes the whole grid. Your notes keep their positions and are re-pitched into the new scale, so switching from major to minor transposes what you have written rather than discarding it.
   - Sounds produced from different waves are represented by different colors of dots on canvas. See below for an example. The sounds made from square wave are blue on the canvas, whereas sounds made from triangle waves are green, and sine waves are white.
     <p align="center">
       <img src="images/canvas4.png" style="height: 150px;" >
     </p>
-  - To erase a selected note, simply click on the note again. It will disappear, and the graph is rearranged for you.
+  - To erase a note, click it again. Clicking anywhere along a long note removes the whole note.
   
   ### Graphs and Visualizations
   - On the bottom left corner, you will find a small circle representing the amplitude graph of your composition. Its shape changes as the loudness of your composition fluctuates. (I implemented this visualization following the [tutorial](https://www.youtube.com/watch?v=jEwAMgcCgOA&list=PLRqwX-V7Uu6aFcVjlDAkkGIixw70s7jpW&index=10&ab_channel=TheCodingTrain) made by The Coding Train)
@@ -83,19 +84,14 @@ The following instructions will walk you through how to use and comprehend each 
   - You can click on the third button to generate a score in [Nyquist](https://www.cs.cmu.edu/~rbd/doc/nyquist/) format. It will download a score.txt file on your computer in the below form, which you can easily copy and paste into the Nyquist IDE and play it using the instruments you defined.
     ```
       {
-      {0.00 0.36 {sine-instr pitch: 68}} 
       {0.00 0.36 {sine-instr pitch: 60}} 
-      {0.36 0.36 {sine-instr pitch: 66}} 
-      {0.36 0.36 {sine-instr pitch: 64}} 
-      {0.72 0.36 {triangle-instr pitch: 70}} 
-      {1.08 0.36 {sine-instr pitch: 68}} 
-      {1.08 0.36 {sine-instr pitch: 63}} 
-      {1.80 0.36 {sine-instr pitch: 67}} 
-      {2.16 0.36 {sine-instr pitch: 70}} 
-      {2.16 0.36 {triangle-instr pitch: 63}} 
-      {2.52 0.36 {sine-instr pitch: 66}} 
-      {2.88 0.36 {sine-instr pitch: 67}} 
-      {3.24 0.36 {sine-instr pitch: 69}} 
+      {0.00 1.44 {sine-instr pitch: 67}} 
+      {0.36 0.72 {sine-instr pitch: 64}} 
+      {1.08 0.36 {triangle-instr pitch: 69}} 
+      {1.44 2.16 {sine-instr pitch: 72}} 
+      {2.16 0.36 {sine-instr pitch: 65}} 
+      {2.52 1.08 {triangle-instr pitch: 62}} 
+      {3.60 0.36 {sine-instr pitch: 67}} 
       }
 ## ✍️ Author <a name = "author"></a>
 
