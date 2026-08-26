@@ -172,10 +172,19 @@ correct: notes played together should sound like they are in the same room as
 each other.
 
 ```
-voices ──> lowpass ──> soft clip ──> delay ──> reverb ──┐
-                                                        ├──> compressor ──> out
-crackle ────────────────────────────────────────────────┘
+                                    ┌──> delay ──┐
+voices ──> lowpass ──> soft clip ──>┤            ├──> reverb ──┐
+                                    └────dry─────┘             │
+                                                               ├──> compressor ──> out
+crackle ───────────────────────────────────────────────────────┘
 ```
+
+The delay is a **parallel send**, not an inline stage. This was corrected during
+implementation: `p5.Delay`'s feedback gain sits in series with its *entire* wet path
+and its dry/wet defaults to fully wet, so a serial delay at `delayFeedback: 0`
+measured exactly 0 rms at its output and silenced everything downstream of it. A
+parallel send is also the musically correct shape — the note always reaches the
+reverb, and the delay only adds quiet repeats on top of it.
 
 | Stage | p5.sound class | Purpose |
 |---|---|---|
