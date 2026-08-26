@@ -27,7 +27,7 @@ export const BUS = {
   reverbDecay: 2.0,
   reverbDryWet: 0.45,
   crackleLevel: 0.015,
-  wobbleRateHz: 0,
-  wobbleDepthCents: 0,
+  wobbleRateHz: 0.7,
+  wobbleDepthCents: 6,
   outputVolume: 0.9,
 };

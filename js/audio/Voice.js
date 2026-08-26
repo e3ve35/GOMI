@@ -1,13 +1,14 @@
-import { VOICE } from "./presets.js";
+import { VOICE, BUS } from "./presets.js";
 
 export function detune(freq, cents) {
   return freq * Math.pow(2, cents / 1200);
 }
 
 export class Voice {
-  constructor(destination) {
+  constructor(destination, wobbleLfo) {
     this.env = new p5.Envelope();
     this.lastUsed = 0;
+    this.wobbleLfo = wobbleLfo;
 
     this.filter = new p5.LowPass();
     this.filter.freq(VOICE.filterCutoffHz);
@@ -42,6 +43,13 @@ export class Voice {
       osc.setType(waveType);
       osc.freq(detune(freq, VOICE.detuneCents[i]));
     });
+
+    if (this.wobbleLfo && BUS.wobbleDepthCents > 0) {
+      const depthHz = freq * (Math.pow(2, BUS.wobbleDepthCents / 1200) - 1);
+      this.wobbleLfo.amp(depthHz);
+      this.oscs.forEach((osc) => osc.freq(this.wobbleLfo));
+    }
+
     this.env.play();
   }
 }

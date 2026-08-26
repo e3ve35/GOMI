@@ -18,7 +18,14 @@ class AudioEngine {
     outputVolume(BUS.outputVolume);
     this.bus = new MasterBus();
     this.destination = this.bus.input;
-    for (let i = 0; i < POOL_SIZE; i++) this.voices.push(new Voice(this.destination));
+
+    this.wobbleLfo = new p5.Oscillator("sine");
+    this.wobbleLfo.disconnect();
+    this.wobbleLfo.freq(BUS.wobbleRateHz);
+    this.wobbleLfo.amp(0);
+    this.wobbleLfo.start();
+
+    for (let i = 0; i < POOL_SIZE; i++) this.voices.push(new Voice(this.destination, this.wobbleLfo));
   }
 
   resume() {
