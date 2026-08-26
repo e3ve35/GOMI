@@ -1,4 +1,3 @@
-import { Score } from "./score/Score.js";
 import { handleMousePressed } from "./score/Cell.js";
 import { EnvelopePanel } from "./ui/EnvelopePanel.js";
 import { createTransport } from "./ui/Transport.js";

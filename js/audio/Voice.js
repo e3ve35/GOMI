@@ -8,7 +8,6 @@ export class Voice {
   constructor(destination, wobbleLfo) {
     this.env = new p5.Envelope();
     this.lastUsed = 0;
-    this.wobbleLfo = wobbleLfo;
 
     if (wobbleLfo) {
       // Every voice taps the one shared LFO through its own gain stage, so

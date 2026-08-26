@@ -42,15 +42,6 @@ export class Cell {
     }
     return false;
   }
-
-  compare(other) {
-    if (this.x < other.x) {
-      return -1;
-    } else if (this.x > other.x) {
-      return 1;
-    }
-    return 0;
-  }
 }
 
 export function handleMousePressed() {

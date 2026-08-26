@@ -4,6 +4,10 @@ export class MasterBus {
   constructor() {
     this.input = new p5.Gain();
     this.input.disconnect();
+    // p5.Gain's constructor hardcodes input.gain.value = 0.5, and amp() only
+    // ever touches output.gain - left alone, this bus's main summing node
+    // would silently cost 6 dB on the entire signal path. Cancel that trim.
+    this.input.input.gain.value = 1;
 
     this.lowpass = new p5.LowPass();
     this.lowpass.freq(BUS.lowpassHz);
