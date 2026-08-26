@@ -1,7 +1,7 @@
 # GOMI — Lo-fi Audio Engine
 
 **Date:** 2026-08-25
-**Status:** Design approved, spec under review
+**Status:** Design approved; open question resolved by probe 2026-08-25
 
 ## Goal
 
@@ -40,6 +40,10 @@ Checked against the repo rather than assumed:
 | p5.Effect provides `chain()`, `setInput()`, `drywet()` | grep of `lib/p5.sound.min.js` |
 | p5 global mode picks up `window.setup` assigned from an ES module | built a minimal page, served it, read `SETUP RAN` from the browser console |
 | The grid allocates 952 `p5.Oscillator` instances (14 rows × 68 cols) | computed from `Canvas.js` constructor values |
+| One `p5.Envelope` drives 3 oscillators + noise via `.amp(env)`; rest level 0.0000, peak 0.4067 | browser probe measuring `p5.Amplitude` output |
+| `env.play(gain)` leaks — gain sits open at 0.1128 at rest | same probe |
+| `p5.Effect.chain()` wires lowpass→distortion→delay→reverb→compressor | browser probe |
+| `osc.freq(lfo)` accepts an oscillator for pitch modulation | browser probe |
 
 That fourth row is the one the restructure depends on. Because it holds, every
 drawing call keeps its current global form — `ellipse(...)`, not `p.ellipse(...)`
@@ -144,12 +148,21 @@ oldest voice. Sixteen voices of three oscillators plus a noise source and a
 filter is roughly 80 audio nodes in total, against 952 today — which is what
 makes a richer voice affordable at all.
 
-**Known unknown:** whether a `p5.Envelope` can drive a `p5.Gain` shared by
-several oscillators (`env.play(gain)`), or whether each oscillator needs its own
-envelope triggered together. The first is cleaner; the second is the documented
-path via `osc.amp(env)` and definitely works. Resolve with a five-minute probe
-during implementation; fall back to the second if the first misbehaves. This
-choice is contained entirely within `Voice.js`.
+**Resolved by probe (2026-08-25).** A single `p5.Envelope` per voice drives all
+three oscillators *and* the noise source: apply `.amp(env)` to each source, then
+trigger once with `env.play()`. Measured output level at rest 0.0000, peak
+0.4067.
+
+The alternative — `env.play(gain)` on a shared `p5.Gain` — is **rejected**. It
+leaves the gain sitting open at level 0.1128 when idle, so sound leaks between
+notes.
+
+A methodological note for whoever verifies this later: reading
+`AudioParam.value` cannot detect any of this. A connected audio signal sums on
+top of the intrinsic value and never appears in `.value`. Measure real output
+with `p5.Amplitude.setInput(source)` instead. Do not leave stale `p5.Amplitude`
+instances bound to stopped sources — they throw
+`Cannot read properties of undefined` on the next poll.
 
 ### MasterBus
 
@@ -297,7 +310,6 @@ known to be the sound and not the move.
 
 | Risk | Mitigation |
 |---|---|
-| Envelope-driving-a-shared-gain may not work in p5.sound 1.0.1 | Documented fallback above; contained in `Voice.js` |
 | p5.Reverb is a convolution reverb and can be CPU-heavy | Tune `reverbSeconds` down; it is a single shared instance, not per voice |
 | Browser autoplay policy blocks audio until a user gesture | `AudioEngine.resume()` on first click; the app already requires a click to create a score |
 | Restructure introduces a silent regression | Step 1 is behaviour-preserving and verified before any audio work begins |
@@ -305,5 +317,5 @@ known to be the sound and not the move.
 
 ## Open questions
 
-None blocking. The envelope/gain question is a five-minute probe at
-implementation time, not a design decision.
+None. The envelope/gain question was resolved by probe before planning; see
+the Voice section.
