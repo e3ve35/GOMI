@@ -14,6 +14,7 @@
       import { NOTES } from "./js/config.js";
       import { sortedInsert } from "./js/score/sortedInsert.js";
       import { scoreDurationSeconds } from "./js/ui/Transport.js";
+      import { Scale, SCALES, midiName } from "./js/score/Scale.js";
 
       let passed = 0, failed = 0;
       const out = document.getElementById("out");
@@ -86,6 +87,56 @@
 
 
 
+
+
+      test("C major over 3 octaves is 22 rows", () => {
+        eq(new Scale(48, "major", 3).rowCount, 22);
+      });
+
+      test("the bottom row is the root", () => {
+        const s = new Scale(48, "major", 3);
+        eq(s.midiForRow(s.rowCount - 1), 48);
+      });
+
+      test("the top row is the root three octaves up", () => {
+        eq(new Scale(48, "major", 3).midiForRow(0), 84);
+      });
+
+      test("rows ascend by scale degree from the bottom", () => {
+        const s = new Scale(48, "major", 3);
+        eq(s.midiForRow(21), 48); // C3
+        eq(s.midiForRow(20), 50); // D3
+        eq(s.midiForRow(19), 52); // E3
+        eq(s.midiForRow(18), 53); // F3
+        eq(s.midiForRow(14), 60); // C4, one octave up
+      });
+
+      test("minor rows use the minor third", () => {
+        const s = new Scale(48, "minor", 3);
+        eq(s.midiForRow(19), 51); // Eb3, not E3
+      });
+
+      test("a pentatonic scale is 16 rows", () => {
+        eq(new Scale(48, "major pentatonic", 3).rowCount, 16);
+      });
+
+      test("midiName fixes the two labels that were wrong", () => {
+        eq(midiName(64), "E4");   // config.js called this e#4
+        eq(midiName(73), "C#5");  // config.js called this d5
+      });
+
+      test("midiName handles octave boundaries", () => {
+        eq(midiName(60), "C4");
+        eq(midiName(59), "B3");
+      });
+
+      test("labelForRow names the row's pitch", () => {
+        eq(new Scale(48, "major", 3).labelForRow(14), "C4");
+      });
+
+      test("every scale starts on the root", () => {
+        Object.values(SCALES).forEach((intervals) => eq(intervals[0], 0));
+      });
 
       out.innerHTML += `<h2 class="${failed ? "fail" : "pass"}">${passed} passed, ${failed} failed</h2>`;
     </script>
