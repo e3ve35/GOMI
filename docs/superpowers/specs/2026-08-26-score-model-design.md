@@ -80,6 +80,10 @@ dorian `[0,2,3,5,7,9,10]`, major pentatonic `[0,2,4,7,9]`, minor pentatonic
 `[0,3,5,7,10]`. Default root C3 (MIDI 48), giving a bass register and a melody
 register in the same view.
 
+Root and scale are chosen from two `createSelect` dropdowns placed beside the
+existing wave-type radio: root note (C through B) and scale name. Octave count is
+fixed at 3 and is not user-facing.
+
 Labels come from MIDI, not a hand-written table:
 
     labelForRow(row) -> NAMES[midi % 12] + (floor(midi / 12) - 1)
@@ -96,7 +100,8 @@ exists.
 
 ## Interaction
 
-- **Press on an existing note** — delete it.
+- **Press on an existing note** — delete the whole note. Any cell the note
+  covers counts, not just its start cell.
 - **Press on empty space** — create `length: 1`, audition it, begin a drag.
 - **Drag right** — `length = max(1, col - startCol + 1)`.
 - **Release** — commit.
@@ -106,7 +111,8 @@ already unambiguous, and a press with no drag is simply length 1.
 
 `length` is clamped so a note cannot run into the next note in its row:
 
-    maxLength = (nextNoteStartCol ?? totalCols) - startCol
+    next      = lowest startCol among notes in this row with startCol > this.startCol
+    maxLength = (next ?? totalCols) - startCol
 
 Dragging into a neighbour truncates rather than overwriting it.
 
