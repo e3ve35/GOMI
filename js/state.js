@@ -1,9 +1,9 @@
 export const state = {
   score: null,
-  selectedCells: [],
   logicalStopTime: 1,
   playing: false,
-  currentCell: null,
+  dragging: null,
+  auditionHandle: null,
   radio: null,
   envelopePanel: null,
 };

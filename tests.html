@@ -11,8 +11,6 @@
     <div id="out"></div>
     <script type="module">
       import { toNyquist } from "./js/nyquist.js";
-      import { NOTES } from "./js/config.js";
-      import { sortedInsert } from "./js/score/sortedInsert.js";
       import { scoreDurationSeconds } from "./js/ui/Transport.js";
       import { Scale, SCALES, midiName } from "./js/score/Scale.js";
       import { Note, noteAt, maxLengthFor, remapRows } from "./js/score/Note.js";
@@ -34,56 +32,13 @@
         }
       }
 
-      const noteNames = Object.keys(NOTES);
 
-      test("toNyquist emits notes in ascending time order", () => {
-        // selectedCells is stored DESCENDING by x, so index 0 is the LAST note.
-        const selected = [
-          { row: 0, col: 2, waveType: "triangle" },
-          { row: 13, col: 0, waveType: "sine" },
-        ];
-        eq(
-          toNyquist(selected, noteNames, NOTES, 0.36),
-          "{\n {0.00 0.36 {sine-instr pitch: 60}} \n {0.72 0.36 {triangle-instr pitch: 73}} \n}"
-        );
-      });
 
-      test("toNyquist handles an empty score", () => {
-        eq(toNyquist([], noteNames, NOTES, 0.36), "{\n}");
-      });
 
-      test("sortedInsert keeps descending x order", () => {
-        const arr = [];
-        [3, 1, 4, 1, 5].forEach((x) => sortedInsert(arr, { x }));
-        eq(arr.map((v) => v.x).join(","), "5,4,3,1,1");
-      });
 
-      test("sortedInsert into an empty array", () => {
-        const arr = [];
-        sortedInsert(arr, { x: 7 });
-        eq(arr.length, 1);
-      });
 
-      test("sortedInsert places equal keys without dropping them", () => {
-        const arr = [{ x: 2 }, { x: 2 }];
-        sortedInsert(arr, { x: 2 });
-        eq(arr.length, 3);
-      });
 
-      test("scoreDurationSeconds uses the last column, not the note count", () => {
-        const stacked = [
-          { col: 0 }, { col: 0 }, { col: 0 }, { col: 0 }, { col: 0 },
-        ];
-        eq(scoreDurationSeconds(stacked, 0.5), 0.5);
-      });
 
-      test("scoreDurationSeconds spans to the final column", () => {
-        eq(scoreDurationSeconds([{ col: 4 }, { col: 0 }], 0.5), 2.5);
-      });
-
-      test("scoreDurationSeconds of an empty score is zero", () => {
-        eq(scoreDurationSeconds([], 0.5), 0);
-      });
 
 
 
@@ -198,6 +153,33 @@
       test("remapRows leaves an in-range score untouched", () => {
         const notes = [new Note(0, 0, 1), new Note(5, 3, 2)];
         eq(remapRows(notes, 22).length, 2);
+      });
+
+
+      test("toNyquist emits notes in ascending time order with real durations", () => {
+        const scale = new Scale(48, "major", 3);
+        const notes = [new Note(0, 2, 3, "triangle"), new Note(21, 0, 1, "sine")];
+        eq(
+          toNyquist(notes, scale, 0.5),
+          "{\n {0.00 0.50 {sine-instr pitch: 48}} \n {1.00 1.50 {triangle-instr pitch: 84}} \n}"
+        );
+      });
+
+      test("toNyquist handles an empty score", () => {
+        eq(toNyquist([], new Scale(), 0.5), "{\n}");
+      });
+
+      test("scoreDurationSeconds spans to the end of the last note", () => {
+        eq(scoreDurationSeconds([new Note(0, 4, 3), new Note(1, 0, 1)], 0.5), 3.5);
+      });
+
+      test("scoreDurationSeconds is not the note count", () => {
+        const stacked = [0, 1, 2, 3, 4].map((r) => new Note(r, 0, 1));
+        eq(scoreDurationSeconds(stacked, 0.5), 0.5);
+      });
+
+      test("scoreDurationSeconds of an empty score is zero", () => {
+        eq(scoreDurationSeconds([], 0.5), 0);
       });
 
       out.innerHTML += `<h2 class="${failed ? "fail" : "pass"}">${passed} passed, ${failed} failed</h2>`;

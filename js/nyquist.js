@@ -1,11 +1,10 @@
-export function toNyquist(selected, noteNames, noteTable, logicalStopTime) {
+export function toNyquist(notes, scale, secondsPerCol) {
+  const sorted = [...notes].sort((a, b) => a.startCol - b.startCol);
   let content = "{\n";
-  for (let i = selected.length - 1; i >= 0; i--) {
-    const cell = selected[i];
-    const startTime = cell.col * logicalStopTime;
-    const instr = cell.waveType + "-instr";
-    const pitch = noteTable[noteNames[cell.row]];
-    content += ` {${startTime.toFixed(2)} ${logicalStopTime} {${instr} pitch: ${pitch}}} \n`;
+  for (const n of sorted) {
+    const start = (n.startCol * secondsPerCol).toFixed(2);
+    const dur = (n.length * secondsPerCol).toFixed(2);
+    content += ` {${start} ${dur} {${n.waveType}-instr pitch: ${scale.midiForRow(n.row)}}} \n`;
   }
   return content + "}";
 }

@@ -1,8 +1,3 @@
-export const NOTES = {
-  d5: 73, c5: 72, b4: 71, "a#4": 70, a4: 69, "g#4": 68, g4: 67,
-  "f#4": 66, f4: 65, "e#4": 64, "d#4": 63, d4: 62, "c#4": 61, c4: 60,
-};
-
 export const COLORS = {
   background: 0,
   content: 255,
@@ -16,7 +11,8 @@ export const COLORS = {
 export const GRID = {
   topY: 100,
   cellWidth: 20,
-  cellHeight: 20,
+  cellHeight: 16,
+  dotSize: 7,
   xRatio: 0.04,
   wRatio: 0.95,
 };

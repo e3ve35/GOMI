@@ -1,4 +1,8 @@
-import { handleMousePressed } from "./score/Cell.js";
+import {
+  handleMousePressed,
+  handleMouseDragged,
+  handleMouseReleased,
+} from "./score/interaction.js";
 import { EnvelopePanel } from "./ui/EnvelopePanel.js";
 import { createTransport } from "./ui/Transport.js";
 import { createVisualizers, drawVisualizers } from "./ui/Visualizers.js";
@@ -36,6 +40,8 @@ window.draw = function () {
 };
 
 window.mousePressed = handleMousePressed;
+window.mouseDragged = handleMouseDragged;
+window.mouseReleased = handleMouseReleased;
 
 function drawHeader() {
   push();

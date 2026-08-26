@@ -1,6 +1,6 @@
 import { Score } from "../score/Score.js";
 import { toNyquist, downloadText } from "../nyquist.js";
-import { COLORS, GRID, LAYOUT, NOTES } from "../config.js";
+import { COLORS, GRID, LAYOUT } from "../config.js";
 import { state } from "../state.js";
 import { audio } from "../audio/AudioEngine.js";
 
@@ -57,29 +57,28 @@ export function createTransport() {
   generateScoreButton.hide();
 }
 
-export function scoreDurationSeconds(selected, logicalStopTime) {
-  if (selected.length === 0) return 0;
-  const lastCol = Math.max(...selected.map((c) => c.col));
-  return (lastCol + 1) * logicalStopTime;
+export function scoreDurationSeconds(notes, secondsPerCol) {
+  if (notes.length === 0) return 0;
+  return Math.max(...notes.map((n) => n.endCol)) * secondsPerCol;
 }
 
 export function playScore() {
-  if (state.score && !state.playing) {
-    state.playing = true;
-    // Schedule the notes
-    state.selectedCells.forEach((cell) => {
-      setTimeout(() => {
-        audio.noteOn(cell.freq, cell.waveType);
-        cell.playing = true;
-        setTimeout(() => {
-          cell.playing = false;
-        }, state.logicalStopTime * 1000);
-      }, cell.col * state.logicalStopTime * 1000);
-    });
+  const score = state.score;
+  if (!score || state.playing) return;
+  state.playing = true;
+  const spc = state.logicalStopTime;
+  for (const note of score.notes) {
     setTimeout(() => {
-      state.playing = false;
-    }, scoreDurationSeconds(state.selectedCells, state.logicalStopTime) * 1000);
+      audio.noteOn(score.freqForRow(note.row), note.waveType);
+      note.playing = true;
+      setTimeout(() => {
+        note.playing = false;
+      }, note.length * spc * 1000);
+    }, note.startCol * spc * 1000);
   }
+  setTimeout(() => {
+    state.playing = false;
+  }, scoreDurationSeconds(score.notes, spc) * 1000);
 }
 
 function create() {
@@ -94,10 +93,7 @@ function create() {
 }
 
 function clearCanvas() {
-  for (let i = 0; i < state.selectedCells.length; i++) {
-    state.selectedCells[i].selected = false;
-  }
-  state.selectedCells.splice(0, state.selectedCells.length);
+  if (state.score) state.score.notes.length = 0;
 }
 
 function changeRadio() {
@@ -105,11 +101,8 @@ function changeRadio() {
 }
 
 export function generateScore() {
-  const text = toNyquist(
-    state.selectedCells,
-    state.score.notes,
-    NOTES,
-    state.logicalStopTime
+  downloadText(
+    toNyquist(state.score.notes, state.score.scale, state.logicalStopTime),
+    "score.txt"
   );
-  downloadText(text, "score.txt");
 }
