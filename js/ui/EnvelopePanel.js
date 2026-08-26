@@ -1,4 +1,4 @@
-import { contentColor } from "../sketch.js";
+import { COLORS } from "../config.js";
 
 export class EnvelopePanel {
   constructor(x, y, w, h) {
@@ -59,7 +59,7 @@ export class EnvelopePanel {
     let l4 = -this.h * this.releaseLevel;
 
     push();
-    fill(contentColor, 20);
+    fill(COLORS.content, 20);
     noStroke();
     rect(this.x, this.y, this.w, this.h);
 
@@ -76,7 +76,7 @@ export class EnvelopePanel {
     push();
     textSize(12);
     textAlign(LEFT);
-    fill(contentColor);
+    fill(COLORS.content);
     noStroke();
     text(
       "attackTime: " + this.attackSlider.value(),

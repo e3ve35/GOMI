@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  <head><meta charset="utf-8" /><title>GOMI tests</title>
+    <style>
+      body { font-family: monospace; background: #111; color: #eee; padding: 20px; }
+      .pass { color: #6f6; } .fail { color: #f66; } pre { color: #aaa; margin: 4px 0 12px 20px; }
+    </style>
+  </head>
+  <body>
+    <h1>GOMI tests</h1>
+    <div id="out"></div>
+    <script type="module">
+      import { toNyquist } from "./js/nyquist.js";
+      import { NOTES } from "./js/config.js";
+      import { sortedInsert } from "./js/score/sortedInsert.js";
+
+      let passed = 0, failed = 0;
+      const out = document.getElementById("out");
+      function test(name, fn) {
+        try { fn(); passed++; out.innerHTML += `<div class="pass">PASS ${name}</div>`; }
+        catch (e) { failed++; out.innerHTML += `<div class="fail">FAIL ${name}</div><pre>${e.message}</pre>`; }
+      }
+      function eq(actual, expected) {
+        if (actual !== expected) {
+          throw new Error(`expected: ${JSON.stringify(expected)}\nactual:   ${JSON.stringify(actual)}`);
+        }
+      }
+
+      const noteNames = Object.keys(NOTES);
+
+      test("toNyquist emits notes in ascending time order", () => {
+        // selectedCells is stored DESCENDING by x, so index 0 is the LAST note.
+        const selected = [
+          { row: 0, col: 2, waveType: "triangle" },
+          { row: 13, col: 0, waveType: "sine" },
+        ];
+        eq(
+          toNyquist(selected, noteNames, NOTES, 0.36),
+          "{\n {0.00 0.36 {sine-instr pitch: 60}} \n {0.72 0.36 {triangle-instr pitch: 73}} \n}"
+        );
+      });
+
+      test("toNyquist handles an empty score", () => {
+        eq(toNyquist([], noteNames, NOTES, 0.36), "{\n}");
+      });
+
+      test("sortedInsert keeps descending x order", () => {
+        const arr = [];
+        [3, 1, 4, 1, 5].forEach((x) => sortedInsert(arr, { x }));
+        eq(arr.map((v) => v.x).join(","), "5,4,3,1,1");
+      });
+
+      test("sortedInsert into an empty array", () => {
+        const arr = [];
+        sortedInsert(arr, { x: 7 });
+        eq(arr.length, 1);
+      });
+
+      test("sortedInsert places equal keys without dropping them", () => {
+        const arr = [{ x: 2 }, { x: 2 }];
+        sortedInsert(arr, { x: 2 });
+        eq(arr.length, 3);
+      });
+
+      out.innerHTML += `<h2 class="${failed ? "fail" : "pass"}">${passed} passed, ${failed} failed</h2>`;
+    </script>
+  </body>
+</html>

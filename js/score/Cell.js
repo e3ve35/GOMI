@@ -1,5 +1,6 @@
 import { state } from "../state.js";
-import { sineColor, triangleColor, sawtoothColor, squareColor } from "../sketch.js";
+import { colorForWave } from "../config.js";
+import { sortedInsert } from "./sortedInsert.js";
 
 export class Cell {
   constructor(row, col, x, y, freq = 440) {
@@ -79,20 +80,7 @@ export function handleMousePressed() {
       state.selectedCells.splice(state.selectedCells.indexOf(state.currentCell), 1);
     } else {
       // represent different wave types with different colors on canvas
-      switch (state.radio.value()) {
-        case "sine":
-          state.currentCell.color = sineColor;
-          break;
-        case "triangle":
-          state.currentCell.color = triangleColor;
-          break;
-        case "sawtooth":
-          state.currentCell.color = sawtoothColor;
-          break;
-        case "square":
-          state.currentCell.color = squareColor;
-          break;
-      }
+      state.currentCell.color = colorForWave(state.radio.value());
       state.currentCell.waveType = state.radio.value();
       state.currentCell.play();
       state.currentCell.selected = true;
@@ -100,18 +88,4 @@ export function handleMousePressed() {
     }
     state.currentCell = null;
   }
-}
-
-export function sortedInsert(arr, value) {
-  let left = 0;
-  let right = arr.length;
-  while (left < right) {
-    let mid = Math.floor(left + (right - left) / 2);
-    if (value.compare(arr[mid]) > 0) {
-      right = mid;
-    } else {
-      left = mid + 1;
-    }
-  }
-  arr.splice(left, 0, value);
 }

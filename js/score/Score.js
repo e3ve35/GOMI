@@ -1,16 +1,16 @@
 import { state } from "../state.js";
-import { notes, contentColor } from "../sketch.js";
+import { NOTES, COLORS, GRID } from "../config.js";
 import { Cell } from "./Cell.js";
 
 export class Score {
   constructor(y, startingNote = 5, numNotes = 14) {
-    this.x = width * 0.04;
+    this.x = width * GRID.xRatio;
     this.y = y;
     this.startingNote = startingNote;
     this.numNotes = numNotes;
-    this.w = width * 0.95;
-    this.cellWidth = 20;
-    this.cellHeight = 20;
+    this.w = width * GRID.wRatio;
+    this.cellWidth = GRID.cellWidth;
+    this.cellHeight = GRID.cellHeight;
     this.h = this.cellHeight * this.numNotes;
     this.cells = [];
     this.notes = [];
@@ -19,12 +19,12 @@ export class Score {
 
   drawSelf() {
     push();
-    fill(contentColor);
+    fill(COLORS.content);
     noStroke();
     // Draw cells
     for (let i = 0; i < this.cells.length; i++) {
       push();
-      stroke(contentColor, 100);
+      stroke(COLORS.content, 100);
       line(
         this.x,
         this.y + i * this.cellHeight,
@@ -33,15 +33,15 @@ export class Score {
       );
       pop();
       for (let j = 0; j < this.cells[i].length; j++) {
-        fill(171, 169, 200, 150);
+        fill(...COLORS.cell);
         this.cells[i][j].drawSelf();
       }
-      fill(contentColor);
+      fill(COLORS.content);
       text(this.notes[i], this.x - 20, this.y + i * this.cellHeight);
     }
 
     // Connect between selected cells
-    stroke(contentColor, 200);
+    stroke(COLORS.content, 200);
     strokeWeight(2);
     for (let i = 0; i < state.selectedCells.length - 1; i++) {
       line(
@@ -70,8 +70,8 @@ export class Score {
   }
 
   init() {
-    for (let i = 0; i < Object.keys(notes).length; i++) {
-      let note = Object.keys(notes)[i];
+    for (let i = 0; i < Object.keys(NOTES).length; i++) {
+      let note = Object.keys(NOTES)[i];
       this.notes.push(note);
       this.cells.push([]);
       for (let j = 0; j < this.w / this.cellWidth; j++) {
@@ -91,5 +91,5 @@ export class Score {
 }
 
 export function noteToMidi(note) {
-  return notes[note];
+  return NOTES[note];
 }
