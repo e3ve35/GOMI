@@ -148,10 +148,11 @@ A `Voice` is one playable note. It holds:
 Voices are allocated once and reused. `AudioEngine` keeps a pool of 16 and hands
 out the least-recently-used one on `noteOn`; a 17th simultaneous note steals the
 oldest voice. Each voice is 3 oscillators, a noise source, a filter, a
-`noiseGain`, and a `wobbleGain` — 7 p5.sound objects — so the pool alone is
-16 × 7 = 112. Including the shared bus and wobble LFO, 143 p5 sound objects are
-live in the page, against 952 today — which is what makes a richer voice
-affordable at all.
+`noiseGain`, a `wobbleGain`, and its own `p5.Envelope` — 8 p5.sound objects — so
+the pool alone is 16 × 8 = 128. Counting the shared bus, the wobble LFO and the
+two visualisers, 142 p5 sound objects are live in the page (measured from
+`p5.soundOut.soundArray`), against 952 oscillators before — which is what makes a
+richer voice affordable at all.
 
 **Resolved by probe (2026-08-25).** A single `p5.Envelope` per voice drives all
 three oscillators *and* the noise source: apply `.amp(env)` to each source, then
