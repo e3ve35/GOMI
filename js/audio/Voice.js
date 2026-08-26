@@ -26,8 +26,12 @@ export class Voice {
 
     this.noise = new p5.Noise("pink");
     this.noise.disconnect();
+    this.noiseGain = new p5.Gain();
+    this.noiseGain.disconnect();
+    this.noiseGain.amp(VOICE.noiseLevel);
+    this.noiseGain.setInput(this.noise);
     this.noise.amp(this.env);
-    this.filter.process(this.noise);
+    this.filter.process(this.noiseGain);
     this.noise.start();
   }
 
