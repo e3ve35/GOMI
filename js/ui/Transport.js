@@ -2,6 +2,8 @@ import { Score } from "../score/Score.js";
 import { toNyquist, downloadText } from "../nyquist.js";
 import { COLORS, GRID, LAYOUT } from "../config.js";
 import { state } from "../state.js";
+import { Scale, SCALES, midiName } from "../score/Scale.js";
+import { remapRows } from "../score/Note.js";
 import { audio } from "../audio/AudioEngine.js";
 
 let playButton;
@@ -9,6 +11,8 @@ let createCanvasButton;
 let generateScoreButton;
 let clearButton;
 let slider;
+let rootSelect;
+let scaleSelect;
 
 export function createTransport() {
   // ioi control slider
@@ -31,6 +35,21 @@ export function createTransport() {
   state.radio.style("background-color", COLORS.sine + "50");
   state.radio.changed(changeRadio);
   state.radio.hide();
+
+  // root and scale selectors
+  rootSelect = createSelect();
+  for (let midi = 48; midi < 60; midi++) rootSelect.option(midiName(midi), midi);
+  rootSelect.selected("48");
+  rootSelect.position(LAYOUT.rootX, LAYOUT.rootY);
+  rootSelect.changed(changeScale);
+  rootSelect.hide();
+
+  scaleSelect = createSelect();
+  for (const name of Object.keys(SCALES)) scaleSelect.option(name);
+  scaleSelect.selected("major");
+  scaleSelect.position(LAYOUT.scaleX, LAYOUT.scaleY);
+  scaleSelect.changed(changeScale);
+  scaleSelect.hide();
 
   // create button
   createCanvasButton = createButton("click to create a score");
@@ -87,6 +106,8 @@ function create() {
     state.score = new Score(GRID.topY);
     createCanvasButton.hide();
     state.radio.show();
+    rootSelect.show();
+    scaleSelect.show();
     playButton.show();
     clearButton.show();
     generateScoreButton.show();
@@ -95,6 +116,13 @@ function create() {
 
 function clearCanvas() {
   if (state.score) state.score.notes.length = 0;
+}
+
+function changeScale() {
+  const score = state.score;
+  if (!score) return;
+  score.scale = new Scale(Number(rootSelect.value()), scaleSelect.value(), 3);
+  score.notes = remapRows(score.notes, score.scale.rowCount);
 }
 
 function changeRadio() {

@@ -22,6 +22,11 @@ export const LAYOUT = {
   ampX: 0.1, ampY: 0.81, ampRadius: 80,
   envX: 0.25, envY: 0.677, envWidth: 350, envHeight: 150,
   radioX: 1090, radioY: 470,
+  // Same row as the wave-type radio and ABOVE the FFT panel (y 500-650 at
+  // x 926-1126): p5 renders DOM controls over the canvas, so placing these
+  // lower would cover the spectrum bars.
+  rootX: 760, rootY: 470,
+  scaleX: 870, scaleY: 470,
   sliderX: 40, sliderY: 462,
 };
 
