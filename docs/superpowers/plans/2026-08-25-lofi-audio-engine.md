@@ -50,6 +50,7 @@ python3 -m http.server 8000
 | `css/styles.css` | All styling, extracted from the inline `<style>` |
 | `js/main.js` | p5 lifecycle wiring only; the only file touching `window` |
 | `js/config.js` | Note table, colours, grid and layout constants |
+| `js/state.js` | The shared mutable app state a p5 global-mode sketch needs (score, selection, transport flags) |
 | `js/nyquist.js` | Score → Nyquist text (pure) + the DOM download helper |
 | `js/audio/presets.js` | Every sound parameter, as plain data |
 | `js/audio/Voice.js` | One playable note: oscillators + noise + filter + envelope |
@@ -164,20 +165,13 @@ In `js/score/Score.js`, rename `class Canvas` to `class Score` and prefix with `
 
 The `Canvas` → `Score` rename matters: the old name collides with p5's canvas and with `createCanvas`.
 
-- [ ] **Step 4: Add imports and exports to the moved files**
+- [ ] **Step 4: Add exports to the moved files**
 
-At the top of `js/score/Cell.js`:
+Only add export keywords and split out the mouse handler. Imports come in Step 7,
+once `js/state.js` exists — do not add any import lines yet.
 
-```js
-import { NOTES, COLORS } from "../config.js";
-import { state } from "../state.js";
-```
-
-Do not add `js/config.js` or `js/state.js` yet — Task 3 creates them. For this task only, keep `Cell.js` and `Score.js` reading the globals they already read, and add the export keywords. The import lines above are what Task 3 will introduce; do not write them now.
-
-Concretely, for this task:
-- `js/score/Cell.js`: add `export` before `class Cell` and before `function sortedInsert`. Remove the top-level `function mousePressed()` — it moves to `main.js` in Step 5. Change it into `export function handleMousePressed()` with an identical body.
-- `js/score/Score.js`: add `export` before `class Score`; add `export` before `function noteToMidi`.
+- `js/score/Cell.js`: add `export` before `class Cell` and before `function sortedInsert`. Convert the top-level `function mousePressed()` into `export function handleMousePressed()` with an identical body — it moves to `main.js` in Step 5.
+- `js/score/Score.js`: add `export` before `class Score` and before `function noteToMidi`.
 - `js/ui/EnvelopePanel.js`: add `export` before `class EnvelopePanel`.
 
 - [ ] **Step 5: Create the entry point**
@@ -699,7 +693,8 @@ Replace 952 per-cell oscillators with 16 pooled voices. Sound stays plain for no
 
 **Files:**
 - Create: `js/audio/presets.js`, `js/audio/Voice.js`, `js/audio/AudioEngine.js`
-- Modify: `js/score/Cell.js`, `js/score/Score.js`, `js/ui/Transport.js`, `js/main.js`, `tests.html`
+- Modify: `js/score/Cell.js`, `js/ui/Transport.js`, `js/main.js`, `tests.html`
+- Modify only if needed: `js/score/Score.js` — `Cell` keeps its `freq` field, so `Score.init()` most likely needs no change. Touch it only if the constructor signature actually forces it.
 
 **Interfaces:**
 - Consumes: `state`, `COLORS`, `EnvelopePanel`
@@ -1107,13 +1102,29 @@ export const BUS = {
 
 Expected at each stage: `lowpassHz` dulls the top end; `distortionAmount` adds a faint grit on peaks; the delay adds quiet repeats so notes trail off; the reverb opens up a room; the crackle adds a constant faint hiss underneath.
 
-- [ ] **Step 5: Verify**
+- [ ] **Step 5: Compensate for the chain's attenuation**
+
+Measured before implementation: the same voice peaks at **0.3481** straight to master
+but only **0.0530** through this chain — roughly 7x quieter. That is expected, not a
+wiring bug. The lowpass, the reverb's dry/wet mix and the compressor each take some
+level.
+
+Raise the output to compensate, in `js/audio/presets.js`:
+
+```js
+outputVolume: 0.9,
+```
+
+If that is still too quiet, raise `VOICE.oscLevel` from `0.18` toward `0.3`. Do not
+chase the level by removing chain stages.
+
+- [ ] **Step 6: Verify**
 
 Open the app. Expected: notes now sustain into a room with a soft tail rather than stopping dead, and a faint constant hiss sits under everything. The amplitude circle should show a long decay after each note instead of a sharp drop. Console clean; `tests.html` still `12 passed, 0 failed`.
 
 If reverb causes audible crackling or dropouts, lower `reverbSeconds` — `p5.Reverb` is a convolution reverb and is the most CPU-hungry stage.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 7: Commit**
 
 ```bash
 git add -A
