@@ -1,0 +1,69 @@
+@font-face {
+  font-family: roboto;
+  src: url(../Share_Tech_Mono/ShareTechMono-Regular.ttf);
+}
+* {
+  font-family: roboto;
+}
+body {
+  background-color: black;
+}
+.p5-slider-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+/* Target the slider input element */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: #eee;
+  height: 1px;
+  width: 50px;
+  border-radius: 4px;
+  outline: none;
+}
+/* Target the slider thumb */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 8px;
+  height: 8px;
+  background: #ffffff;
+  border-radius: 50%;
+  cursor: pointer;
+}
+button {
+  background-color: #eee;
+  border: none;
+  color: black;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  min-width: 230px;
+}
+button:hover {
+  background-color: black;
+  border: 1px solid white;
+  color: white;
+}
+
+/* input[type="radio"] {
+  display: none;
+} */
+
+label.radio {
+  display: block;
+}
+
+/* #my-canvas {
+  display: block;
+  width: 80%;
+  height: 80%;
+  margin: auto;
+} */
