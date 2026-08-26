@@ -17,7 +17,18 @@ window.preload = function () {
 };
 
 window.setup = function () {
-  createCanvas(1425, 738).id("my-score");
+  const myCanvas = createCanvas(1425, 738);
+  myCanvas.id("my-score");
+  // Capture the pointer for the duration of a drag. Without it a release
+  // outside the browser window delivers no mouseup, p5 never fires
+  // mouseReleased, and a held audition note sustains forever.
+  myCanvas.elt.addEventListener("pointerdown", (e) => {
+    try {
+      myCanvas.elt.setPointerCapture(e.pointerId);
+    } catch (err) {
+      /* stale pointer id - the normal mouseup path still applies */
+    }
+  });
   angleMode(DEGREES);
   audio.init();
   createTransport();

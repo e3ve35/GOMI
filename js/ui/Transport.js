@@ -1,6 +1,6 @@
 import { Score } from "../score/Score.js";
 import { toNyquist, downloadText } from "../nyquist.js";
-import { COLORS, GRID, LAYOUT } from "../config.js";
+import { COLORS, GRID, LAYOUT, colorForWave } from "../config.js";
 import { state } from "../state.js";
 import { Scale, SCALES, midiName } from "../score/Scale.js";
 import { remapRows } from "../score/Note.js";
@@ -13,6 +13,10 @@ let clearButton;
 let slider;
 let rootSelect;
 let scaleSelect;
+
+// Everything playScore schedules, so it can be cancelled mid-run.
+let scheduled = [];
+let sounding = [];
 
 export function createTransport() {
   // ioi control slider
@@ -81,24 +85,44 @@ export function scoreDurationSeconds(notes, secondsPerCol) {
   return Math.max(...notes.map((n) => n.endCol)) * secondsPerCol;
 }
 
+export function stopPlayback() {
+  scheduled.forEach(clearTimeout);
+  scheduled = [];
+  sounding.forEach((handle) => audio.noteOff(handle));
+  sounding = [];
+  if (state.score) for (const note of state.score.notes) note.playing = false;
+  state.playing = false;
+}
+
 export function playScore() {
   const score = state.score;
   if (!score || state.playing) return;
   state.playing = true;
   const spc = state.logicalStopTime;
+
   for (const note of score.notes) {
-    setTimeout(() => {
-      const handle = audio.noteOn(score.freqForRow(note.row), note.waveType);
-      note.playing = true;
+    scheduled.push(
       setTimeout(() => {
-        audio.noteOff(handle);
-        note.playing = false;
-      }, note.length * spc * 1000);
-    }, note.startCol * spc * 1000);
+        // The note may have been deleted between scheduling and firing.
+        if (!score.notes.includes(note)) return;
+        const handle = audio.noteOn(score.freqForRow(note.row), note.waveType);
+        sounding.push(handle);
+        note.playing = true;
+        scheduled.push(
+          setTimeout(() => {
+            audio.noteOff(handle);
+            const i = sounding.indexOf(handle);
+            if (i !== -1) sounding.splice(i, 1);
+            note.playing = false;
+          }, note.length * spc * 1000)
+        );
+      }, note.startCol * spc * 1000)
+    );
   }
-  setTimeout(() => {
-    state.playing = false;
-  }, scoreDurationSeconds(score.notes, spc) * 1000);
+
+  scheduled.push(
+    setTimeout(stopPlayback, scoreDurationSeconds(score.notes, spc) * 1000)
+  );
 }
 
 function create() {
@@ -115,6 +139,7 @@ function create() {
 }
 
 function clearCanvas() {
+  stopPlayback();
   if (state.score) state.score.notes.length = 0;
 }
 
@@ -126,7 +151,7 @@ function changeScale() {
 }
 
 function changeRadio() {
-  state.radio.style("background-color", COLORS[state.radio.value()] + "50");
+  state.radio.style("background-color", colorForWave(state.radio.value()) + "50");
 }
 
 export function generateScore() {

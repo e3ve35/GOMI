@@ -2,10 +2,23 @@ import { state } from "../state.js";
 import { Note, noteAt, maxLengthFor } from "./Note.js";
 import { audio } from "../audio/AudioEngine.js";
 
+// The audition sounds for as long as the button is held, so it is only ever
+// silenced by an explicit noteOff - a missed one holds at sustain forever.
+function releaseAudition() {
+  audio.noteOff(state.auditionHandle);
+  state.auditionHandle = null;
+}
+
 export function handleMousePressed(event) {
   // p5 fires this for clicks anywhere on the page, including the buttons and
   // sliders layered over the canvas - only the canvas itself places notes.
   if (event && event.target && event.target.tagName !== "CANVAS") return;
+  // Without this, a right-click meant for the context menu writes a note.
+  if (mouseButton !== LEFT) return;
+
+  // Covers any earlier audition whose mouseup never arrived: its handle is
+  // about to be overwritten, which would strand that voice permanently.
+  releaseAudition();
 
   const score = state.score;
   if (!score || !score.inside(mouseX, mouseY)) return;
@@ -36,7 +49,6 @@ export function handleMouseDragged() {
 }
 
 export function handleMouseReleased() {
-  audio.noteOff(state.auditionHandle);
-  state.auditionHandle = null;
+  releaseAudition();
   state.dragging = null;
 }

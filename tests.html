@@ -26,11 +26,6 @@
           throw new Error(`expected: ${JSON.stringify(expected)}\nactual:   ${JSON.stringify(actual)}`);
         }
       }
-      function close(actual, expected, tol = 1e-6) {
-        if (Math.abs(actual - expected) > tol) {
-          throw new Error(`expected ${expected} +/- ${tol}, got ${actual}`);
-        }
-      }
 
 
 
