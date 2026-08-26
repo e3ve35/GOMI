@@ -937,11 +937,12 @@ Sound is unchanged for now - enriching the voice is the next step."
 Now the sound starts changing. Three detuned oscillators, a breath of noise, a lowpass that actually filters.
 
 **Files:**
-- Modify: `js/audio/presets.js`, `js/audio/Voice.js`
+- Modify: `js/audio/presets.js`
 
 **Interfaces:**
-- Consumes: `Voice`, `VOICE` from Task 5
-- Produces: `Voice.noiseGain` — a `p5.Gain` scaling the noise layer independently of the envelope
+- Consumes: `Voice`, `VOICE` and `Voice.noiseGain` from Task 5 (the noise-gain wiring
+  was pulled forward into Task 5 — see Step 2)
+- Produces: nothing new — `Voice.js` already reads every one of these values
 
 - [ ] **Step 1: Widen the voice preset**
 
@@ -959,20 +960,22 @@ export const VOICE = {
 
 `oscLevel` drops from 0.25 to 0.18 because three oscillators now sum where one played before.
 
-- [ ] **Step 2: Apply the noise level**
+- [ ] **Step 2: Confirm the noise gain is already in place**
 
-`VOICE.noiseLevel` is declared but `Voice.js` currently sends the noise through the shared envelope at full range, which is far too loud. Scale it with its own gain in the `Voice` constructor, replacing the `this.noise.amp(this.env)` line:
+This step's wiring was pulled forward into Task 5, because leaving it undone made
+`VOICE.noiseLevel` dead configuration and let full-level pink noise into Task 5 —
+which was supposed to leave the sound untouched. Confirm rather than re-implement:
 
-```js
-this.noiseGain = new p5.Gain();
-this.noiseGain.disconnect();
-this.noiseGain.amp(VOICE.noiseLevel);
-this.noiseGain.setInput(this.noise);
-this.noise.amp(this.env);
-this.filter.process(this.noiseGain);
+```bash
+grep -n "noiseGain" js/audio/Voice.js
 ```
 
-Remove the earlier `this.filter.process(this.noise)` line so the noise reaches the filter only through its gain.
+Expected: `noiseGain` is constructed, disconnected, `amp(VOICE.noiseLevel)`, takes
+`setInput(this.noise)`, and reaches the filter via `filter.process(this.noiseGain)` —
+with the raw `this.noise` NOT connected to the filter directly. If any of that is
+missing, add it before continuing.
+
+Raising `noiseLevel` to `0.03` in Step 1 is therefore the only change needed here.
 
 - [ ] **Step 3: Verify by ear and by eye**
 
