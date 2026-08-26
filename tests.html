@@ -15,6 +15,7 @@
       import { sortedInsert } from "./js/score/sortedInsert.js";
       import { scoreDurationSeconds } from "./js/ui/Transport.js";
       import { Scale, SCALES, midiName } from "./js/score/Scale.js";
+      import { Note, noteAt, maxLengthFor, remapRows } from "./js/score/Note.js";
 
       let passed = 0, failed = 0;
       const out = document.getElementById("out");
@@ -136,6 +137,67 @@
 
       test("every scale starts on the root", () => {
         Object.values(SCALES).forEach((intervals) => eq(intervals[0], 0));
+      });
+
+
+      test("a note covers every column from its start", () => {
+        const n = new Note(0, 4, 3);
+        eq(n.endCol, 7);
+        eq(n.covers(3), false);
+        eq(n.covers(4), true);
+        eq(n.covers(6), true);
+        eq(n.covers(7), false);
+      });
+
+      test("noteAt finds a note by any column it covers", () => {
+        const notes = [new Note(2, 4, 3)];
+        eq(noteAt(notes, 2, 5), notes[0]);
+        eq(noteAt(notes, 2, 9), null);
+        eq(noteAt(notes, 3, 5), null);
+      });
+
+      test("maxLengthFor runs to the grid edge with nothing in the way", () => {
+        eq(maxLengthFor([], 0, 60, 68), 8);
+      });
+
+      test("maxLengthFor stops at the next note in the same row", () => {
+        const notes = [new Note(0, 10, 1)];
+        eq(maxLengthFor(notes, 0, 4, 68), 6);
+      });
+
+      test("maxLengthFor ignores notes in other rows", () => {
+        const notes = [new Note(1, 6, 1)];
+        eq(maxLengthFor(notes, 0, 4, 68), 64);
+      });
+
+      test("maxLengthFor ignores notes that start earlier", () => {
+        const notes = [new Note(0, 1, 1)];
+        eq(maxLengthFor(notes, 0, 4, 68), 64);
+      });
+
+      test("maxLengthFor picks the nearest of several later notes", () => {
+        const notes = [new Note(0, 30, 1), new Note(0, 12, 1), new Note(0, 50, 1)];
+        eq(maxLengthFor(notes, 0, 4, 68), 8);
+      });
+
+      test("remapRows clamps rows that no longer exist", () => {
+        const notes = [new Note(21, 0, 1), new Note(3, 0, 1)];
+        const out = remapRows(notes, 16);
+        eq(out.length, 2);
+        eq(out.filter((n) => n.row === 15).length, 1);
+        eq(out.filter((n) => n.row === 3).length, 1);
+      });
+
+      test("remapRows drops duplicates created by clamping, keeping the longer", () => {
+        const notes = [new Note(21, 0, 1), new Note(20, 0, 4)];
+        const out = remapRows(notes, 16);
+        eq(out.length, 1);
+        eq(out[0].length, 4);
+      });
+
+      test("remapRows leaves an in-range score untouched", () => {
+        const notes = [new Note(0, 0, 1), new Note(5, 3, 2)];
+        eq(remapRows(notes, 22).length, 2);
       });
 
       out.innerHTML += `<h2 class="${failed ? "fail" : "pass"}">${passed} passed, ${failed} failed</h2>`;
