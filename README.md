@@ -53,7 +53,7 @@ The following instructions will walk you through how to use and comprehend each 
     <p align="center">
       <img src="images/canvas3.png" style="height: 150px;" >
     </p>
-  - You can switch between different type of waves you want to use in your sound synthesis. There are 4 options: sine, triangle, sawtooth, and square. Select one of them then click on the canvas, you will hear different results. 
+  - You can switch between different type of waves you want to use in your sound synthesis. There are 4 options: sine, triangle, sawtooth, and square. Select one of them then click on the canvas to hear it - each note is actually a small stack of detuned oscillators plus a touch of noise, run through a shared lo-fi effects chain, so the four wave types color the sound rather than producing starkly different results.
   - Sounds produced from different waves are represented by different colors of dots on canvas. See below for an example. The sounds made from square wave are blue on the canvas, whereas sounds made from triangle waves are green, and sine waves are white.
     <p align="center">
       <img src="images/canvas4.png" style="height: 150px;" >
