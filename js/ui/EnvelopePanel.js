@@ -1,4 +1,6 @@
-class Envelope {
+import { contentColor } from "../sketch.js";
+
+export class EnvelopePanel {
   constructor(x, y, w, h) {
     this.x = x;
     this.y = y;

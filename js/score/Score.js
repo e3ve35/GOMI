@@ -1,4 +1,8 @@
-class Canvas {
+import { state } from "../state.js";
+import { notes, contentColor } from "../sketch.js";
+import { Cell } from "./Cell.js";
+
+export class Score {
   constructor(y, startingNote = 5, numNotes = 14) {
     this.x = width * 0.04;
     this.y = y;
@@ -39,12 +43,12 @@ class Canvas {
     // Connect between selected cells
     stroke(contentColor, 200);
     strokeWeight(2);
-    for (let i = 0; i < selectedCells.length - 1; i++) {
+    for (let i = 0; i < state.selectedCells.length - 1; i++) {
       line(
-        selectedCells[i].x,
-        selectedCells[i].y,
-        selectedCells[i + 1].x,
-        selectedCells[i + 1].y
+        state.selectedCells[i].x,
+        state.selectedCells[i].y,
+        state.selectedCells[i + 1].x,
+        state.selectedCells[i + 1].y
       );
     }
 
@@ -86,6 +90,6 @@ class Canvas {
   }
 }
 
-function noteToMidi(note) {
+export function noteToMidi(note) {
   return notes[note];
 }

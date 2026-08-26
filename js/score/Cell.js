@@ -1,5 +1,7 @@
-var currentCell = null;
-class Cell {
+import { state } from "../state.js";
+import { sineColor, triangleColor, sawtoothColor, squareColor } from "../sketch.js";
+
+export class Cell {
   constructor(row, col, x, y, freq = 440) {
     this.row = row;
     this.col = col;
@@ -21,12 +23,12 @@ class Cell {
 
   play() {
     this.env.setADSR(
-      globalADSR.attackTime,
-      globalADSR.decayTime,
-      globalADSR.sustainLevel,
-      globalADSR.releaseTime
+      state.envelopePanel.attackTime,
+      state.envelopePanel.decayTime,
+      state.envelopePanel.sustainLevel,
+      state.envelopePanel.releaseTime
     );
-    this.env.setRange(globalADSR.attackLevel, globalADSR.releaseLevel);
+    this.env.setRange(state.envelopePanel.attackLevel, state.envelopePanel.releaseLevel);
     this.wave.setType(this.waveType);
     this.wave.start();
     this.wave.amp(this.env);
@@ -49,7 +51,7 @@ class Cell {
   collide() {
     if (dist(this.x, this.y, mouseX, mouseY) < this.r) {
       this.r = min(this.r + 1, this.maxR);
-      currentCell = this;
+      state.currentCell = this;
       return true;
     }
     if (!this.playing) {
@@ -68,39 +70,39 @@ class Cell {
   }
 }
 
-function mousePressed() {
+export function handleMousePressed() {
   // console.log(mouseX, mouseY);
-  if (currentCell && currentCell.collide()) {
-    if (currentCell.selected) {
+  if (state.currentCell && state.currentCell.collide()) {
+    if (state.currentCell.selected) {
       // console.log(currentCell.row, currentCell.col);
-      currentCell.selected = false;
-      selectedCells.splice(selectedCells.indexOf(currentCell), 1);
+      state.currentCell.selected = false;
+      state.selectedCells.splice(state.selectedCells.indexOf(state.currentCell), 1);
     } else {
       // represent different wave types with different colors on canvas
-      switch (myRadio.value()) {
+      switch (state.radio.value()) {
         case "sine":
-          currentCell.color = sineColor;
+          state.currentCell.color = sineColor;
           break;
         case "triangle":
-          currentCell.color = triangleColor;
+          state.currentCell.color = triangleColor;
           break;
         case "sawtooth":
-          currentCell.color = sawtoothColor;
+          state.currentCell.color = sawtoothColor;
           break;
         case "square":
-          currentCell.color = squareColor;
+          state.currentCell.color = squareColor;
           break;
       }
-      currentCell.waveType = myRadio.value();
-      currentCell.play();
-      currentCell.selected = true;
-      sortedInsert(selectedCells, currentCell);
+      state.currentCell.waveType = state.radio.value();
+      state.currentCell.play();
+      state.currentCell.selected = true;
+      sortedInsert(state.selectedCells, state.currentCell);
     }
-    currentCell = null;
+    state.currentCell = null;
   }
 }
 
-function sortedInsert(arr, value) {
+export function sortedInsert(arr, value) {
   let left = 0;
   let right = arr.length;
   while (left < right) {

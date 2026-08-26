@@ -1,17 +1,20 @@
+import { Score } from "./score/Score.js";
+import { EnvelopePanel } from "./ui/EnvelopePanel.js";
+import { state } from "./state.js";
+
 var amp;
 var fft;
 var playButton;
 var createCanvasButton;
 var generateScoreButton;
 var clearButton;
-var myRadio;
 var amphistory = [];
-var playing = false;
+var slider;
+var fftWidth;
+var fftHeight;
 
 /** global score information */
-var score = null;
-var globalADSR;
-var notes = {
+export var notes = {
   d5: 73,
   c5: 72,
   b4: 71,
@@ -28,26 +31,23 @@ var notes = {
   c4: 60,
 };
 
-var selectedCells = [];
-var logicalStopTime = 1;
-
 /** styles */
 var backgroundColor = 0;
-var contentColor = 255;
+export var contentColor = 255;
 
 /** assets */
 var myFont;
 var pianoNote;
-var sineColor = "#FFFFFF";
-var triangleColor = "#68A357";
-var sawtoothColor = "#5FB49C";
-var squareColor = "#414288";
+export var sineColor = "#FFFFFF";
+export var triangleColor = "#68A357";
+export var sawtoothColor = "#5FB49C";
+export var squareColor = "#414288";
 
-function preload() {
+export function preload() {
   myFont = loadFont("Share_Tech_Mono/ShareTechMono-Regular.ttf");
 }
 
-function setup() {
+export function setup() {
   // create an interface to change frequency, waveform, etc.
   let myCanvas = createCanvas(1425, 738);
   print(width, height);
@@ -59,17 +59,17 @@ function setup() {
   slider.position(40, 390);
 
   // drop down menu
-  myRadio = createRadio();
-  myRadio.option("sine");
-  myRadio.option("triangle");
-  myRadio.option("sawtooth");
-  myRadio.option("square");
-  myRadio.selected("sine");
-  myRadio.position(1090, 400);
-  myRadio.style("color", "white");
-  myRadio.style("background-color", sineColor + "50");
-  myRadio.changed(changeRadio);
-  myRadio.hide();
+  state.radio = createRadio();
+  state.radio.option("sine");
+  state.radio.option("triangle");
+  state.radio.option("sawtooth");
+  state.radio.option("square");
+  state.radio.selected("sine");
+  state.radio.position(1090, 400);
+  state.radio.style("color", "white");
+  state.radio.style("background-color", sineColor + "50");
+  state.radio.changed(changeRadio);
+  state.radio.hide();
 
   // create button
   createCanvasButton = createButton("click to create a score");
@@ -104,11 +104,11 @@ function setup() {
   textSize(15);
   textAlign(CENTER, CENTER);
 
-  globalADSR = new Envelope(width * 0.25, height * 0.65, 350, 170);
+  state.envelopePanel = new EnvelopePanel(width * 0.25, height * 0.65, 350, 170);
 }
 
-https: function draw() {
-  logicalStopTime = slider.value() / 100;
+export function draw() {
+  state.logicalStopTime = slider.value() / 100;
   background(backgroundColor);
   drawText();
   drawScore();
@@ -152,7 +152,7 @@ function drawText() {
   textSize(12);
   textAlign(LEFT);
   text("logical-stop-time: " + slider.value() / 100, 90, 383);
-  if (!score) {
+  if (!state.score) {
     rectMode(CENTER);
     fill(contentColor, 20);
     rect(width / 2, 230, width * 0.95, 280);
@@ -161,12 +161,12 @@ function drawText() {
 }
 
 function drawADSR() {
-  globalADSR.drawSelf();
+  state.envelopePanel.drawSelf();
 }
 
 function drawScore() {
-  if (score) {
-    score.drawSelf();
+  if (state.score) {
+    state.score.drawSelf();
   }
 }
 
@@ -186,7 +186,7 @@ function visualizeAmplitudeCircle() {
   noFill();
   beginShape();
   for (let i = 0; i < 360; i++) {
-    r = map(amphistory[i], 0, 1, 100, 0);
+    let r = map(amphistory[i], 0, 1, 100, 0);
     let x = r * cos(i);
     let y = r * sin(i);
     vertex(x, y);
@@ -200,30 +200,30 @@ function visualizeAmplitudeCircle() {
 
 function playScore() {
   // console.log(playing);
-  if (score && !playing) {
-    playing = true;
+  if (state.score && !state.playing) {
+    state.playing = true;
     // Schedule the notes
-    selectedCells.forEach((cell) => {
+    state.selectedCells.forEach((cell) => {
       setTimeout(() => {
         cell.play();
         cell.playing = true;
         setTimeout(() => {
           cell.playing = false;
-        }, logicalStopTime * 1000);
-      }, cell.col * logicalStopTime * 1000);
+        }, state.logicalStopTime * 1000);
+      }, cell.col * state.logicalStopTime * 1000);
     });
     setTimeout(() => {
-      playing = false;
-    }, selectedCells.length * logicalStopTime * 1000);
+      state.playing = false;
+    }, state.selectedCells.length * state.logicalStopTime * 1000);
   }
 }
 
 function create() {
   // console.log("clicked");
-  if (!score) {
-    score = new Canvas(100);
+  if (!state.score) {
+    state.score = new Score(100);
     createCanvasButton.hide();
-    myRadio.show();
+    state.radio.show();
     playButton.show();
     clearButton.show();
     generateScoreButton.show();
@@ -231,21 +231,21 @@ function create() {
 }
 
 function clearCanvas() {
-  for (let i = 0; i < selectedCells.length; i++) {
-    selectedCells[i].selected = false;
+  for (let i = 0; i < state.selectedCells.length; i++) {
+    state.selectedCells[i].selected = false;
   }
-  selectedCells.splice(0, selectedCells.length);
+  state.selectedCells.splice(0, state.selectedCells.length);
 }
 
 function changeRadio() {
-  if (myRadio.value() == "sine") {
-    myRadio.style("background-color", sineColor + "50");
-  } else if (myRadio.value() == "triangle") {
-    myRadio.style("background-color", triangleColor + "50");
-  } else if (myRadio.value() == "sawtooth") {
-    myRadio.style("background-color", sawtoothColor + "50");
-  } else if (myRadio.value() == "square") {
-    myRadio.style("background-color", squareColor + "50");
+  if (state.radio.value() == "sine") {
+    state.radio.style("background-color", sineColor + "50");
+  } else if (state.radio.value() == "triangle") {
+    state.radio.style("background-color", triangleColor + "50");
+  } else if (state.radio.value() == "sawtooth") {
+    state.radio.style("background-color", sawtoothColor + "50");
+  } else if (state.radio.value() == "square") {
+    state.radio.style("background-color", squareColor + "50");
   }
 }
 
@@ -255,11 +255,11 @@ function generateScore() {
 
   // construct the score in nyquist format
   // {0 1 {note pitch: c2}}
-  for (let i = selectedCells.length - 1; i >= 0; i--) {
-    let startTime = selectedCells[i].col * logicalStopTime;
-    let dur = logicalStopTime;
-    let instr = selectedCells[i].waveType + "-instr";
-    let pitch = notes[score.notes[selectedCells[i].row]];
+  for (let i = state.selectedCells.length - 1; i >= 0; i--) {
+    let startTime = state.selectedCells[i].col * state.logicalStopTime;
+    let dur = state.logicalStopTime;
+    let instr = state.selectedCells[i].waveType + "-instr";
+    let pitch = notes[state.score.notes[state.selectedCells[i].row]];
     fileContent += ` {${startTime.toFixed(
       2
     )} ${dur} {${instr} pitch: ${pitch}}} \n`;
