@@ -1,9 +1,9 @@
 export const VOICE = {
-  detuneCents: [0], // Task 6 widens this to [0, -7, 5]
-  filterCutoffHz: 20000, // Task 6 lowers this
-  filterResonance: 1,
-  noiseLevel: 0, // Task 6 raises this
-  oscLevel: 0.25,
+  detuneCents: [0, -7, 5],
+  filterCutoffHz: 1800,
+  filterResonance: 3,
+  noiseLevel: 0.03,
+  oscLevel: 0.18,
 };
 
 export const BUS = {
