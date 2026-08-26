@@ -30,7 +30,11 @@ class AudioEngine {
     let oldest = this.voices[0];
     for (const v of this.voices) if (v.lastUsed < oldest.lastUsed) oldest = v;
     oldest.lastUsed = ++this.counter;
-    oldest.noteOn(freq, waveType, this.adsr);
+    return { voice: oldest, token: oldest.noteOn(freq, waveType, this.adsr) };
+  }
+
+  noteOff(handle) {
+    if (handle) handle.voice.noteOff(handle.token);
   }
 
   voiceCount() {

@@ -22,7 +22,7 @@ export function handleMousePressed(event) {
   const note = new Note(row, col, 1, state.radio.value());
   score.notes.push(note);
   state.dragging = note;
-  audio.noteOn(score.freqForRow(row), note.waveType);
+  state.auditionHandle = audio.noteOn(score.freqForRow(row), note.waveType);
 }
 
 export function handleMouseDragged() {
@@ -36,5 +36,7 @@ export function handleMouseDragged() {
 }
 
 export function handleMouseReleased() {
+  audio.noteOff(state.auditionHandle);
+  state.auditionHandle = null;
   state.dragging = null;
 }

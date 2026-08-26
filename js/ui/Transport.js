@@ -69,9 +69,10 @@ export function playScore() {
   const spc = state.logicalStopTime;
   for (const note of score.notes) {
     setTimeout(() => {
-      audio.noteOn(score.freqForRow(note.row), note.waveType);
+      const handle = audio.noteOn(score.freqForRow(note.row), note.waveType);
       note.playing = true;
       setTimeout(() => {
+        audio.noteOff(handle);
         note.playing = false;
       }, note.length * spc * 1000);
     }, note.startCol * spc * 1000);
