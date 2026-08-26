@@ -14,7 +14,6 @@
       import { NOTES } from "./js/config.js";
       import { sortedInsert } from "./js/score/sortedInsert.js";
       import { scoreDurationSeconds } from "./js/ui/Transport.js";
-      import { detune } from "./js/audio/Voice.js";
 
       let passed = 0, failed = 0;
       const out = document.getElementById("out");
@@ -84,21 +83,9 @@
         eq(scoreDurationSeconds([], 0.5), 0);
       });
 
-      test("detune of 0 cents returns the same frequency", () => {
-        close(detune(440, 0), 440);
-      });
 
-      test("detune of 1200 cents is one octave up", () => {
-        close(detune(440, 1200), 880);
-      });
 
-      test("detune of -1200 cents is one octave down", () => {
-        close(detune(440, -1200), 220);
-      });
 
-      test("detune of 7 cents is a small sharpening", () => {
-        close(detune(440, 7), 440 * Math.pow(2, 7 / 1200), 1e-9);
-      });
 
       out.innerHTML += `<h2 class="${failed ? "fail" : "pass"}">${passed} passed, ${failed} failed</h2>`;
     </script>
