@@ -53,8 +53,7 @@ export function createTransport() {
   state.radio = createRadio();
   ["sine", "triangle", "sawtooth", "square"].forEach((w) => state.radio.option(w));
   state.radio.selected("sine");
-  state.radio.style("color", "white");
-  state.radio.style("background-color", COLORS.sine + "50");
+  state.radio.style("color", COLORS.sine);
   state.radio.changed(changeRadio);
   hideUntilScore(state.radio);
 
@@ -88,7 +87,9 @@ export function layoutTransport(L) {
   slider.position(L.controls.sliderX, L.controls.y);
   state.radio.position(L.controls.radioX, L.controls.y);
   rootSelect.position(L.controls.rootX, L.controls.y);
+  rootSelect.style("width", "56px");
   scaleSelect.position(L.controls.scaleX, L.controls.y);
+  scaleSelect.style("width", "140px");
   createCanvasButton.position(L.w / 2 - 115, L.grid.y + L.grid.h / 2 - 20);
   buttons.forEach((button, i) => {
     const box = L.buttonAt(i);
@@ -163,8 +164,10 @@ function changeScale() {
   score.notes = remapRows(score.notes, score.scale.rowCount);
 }
 
+// Tint the selector with the colour its notes will take, instead of the
+// translucent block that used to sit behind it.
 function changeRadio() {
-  state.radio.style("background-color", colorForWave(state.radio.value()) + "50");
+  state.radio.style("color", colorForWave(state.radio.value()));
 }
 
 export function generateScore() {

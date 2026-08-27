@@ -63,11 +63,11 @@ export class EnvelopePanel {
     const l4 = -this.h * v.releaseLevel;
 
     push();
-    fill(COLORS.content, 20);
+    fill(...COLORS.panel);
     noStroke();
     rect(this.x, this.y, this.w, this.h);
 
-    stroke(200, 100, 125, 200);
+    stroke(...COLORS.envelopeCurve, 210);
     translate(this.x, this.y + this.h);
     line(0, 0, t1, l1);
     line(t1, l1, t2, l2);

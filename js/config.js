@@ -1,15 +1,26 @@
 export const COLORS = {
   background: 0,
   content: 255,
+  // Wave types, and the colour their notes take on the grid.
   sine: "#FFFFFF",
   triangle: "#68A357",
   sawtooth: "#5FB49C",
-  square: "#414288",
-  cell: [171, 169, 200, 150],
+  // Lifted from #414288, which was so dark against black that square-wave
+  // notes were nearly invisible. Same hue, usable lightness.
+  square: "#7B80D6",
+  // Dimmed so written notes read as foreground against the 22-row dot field.
+  cell: [150, 150, 175, 105],
   // The drag hint. Faint enough to read as an affordance rather than content;
   // the chevron is brighter so the direction registers at a glance.
   ghost: [255, 255, 255, 38],
   ghostTip: [255, 255, 255, 110],
+  // Panel furniture.
+  caption: [255, 255, 255, 105],
+  panel: [255, 255, 255, 14],
+  // Was pure #00FF00 - the only saturated colour on the page. Brought into
+  // the same green/teal family as the wave colours.
+  spectrum: "#74C69D",
+  envelopeCurve: [198, 112, 134],
 };
 
 export const GRID = {
@@ -78,9 +89,9 @@ export function computeLayout(w, h) {
 
   // Measured against the rendered controls; the visual pass pins these
   // widths in CSS so they stop being estimates.
-  const radioW = 315;
+  const radioW = 295;
   const scaleW = 140;
-  const rootW = 52;
+  const rootW = 56;
   const radioX = w - S.pad - radioW;
   const scaleX = radioX - S.gap - scaleW;
   const rootX = scaleX - 10 - rootW;

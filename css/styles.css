@@ -16,65 +16,80 @@ body {
 canvas {
   display: block;
 }
-.p5-slider-container {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
+
+/* Buttons were solid #eee blocks 230px wide - the brightest thing on the page,
+   pulling the eye off the score. Ghost styling puts them back in the
+   background where a transport control belongs. */
+button {
+  box-sizing: border-box;
+  white-space: nowrap;
+  height: 40px;
+  padding: 0 18px;
+  background-color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #e8e8ec;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
 }
-/* Target the slider input element */
+button:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.55);
+  color: #ffffff;
+}
+button:active {
+  background-color: rgba(255, 255, 255, 0.16);
+}
+
+/* Native selects render as bright OS chrome against the dark canvas. */
+select {
+  box-sizing: border-box;
+  height: 26px;
+  padding: 0 6px;
+  background-color: #0d0d10;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 0;
+  color: #e8e8ec;
+  font-size: 12px;
+  outline: none;
+  cursor: pointer;
+}
+select:hover {
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+/* p5 builds the radio as inline labels; without nowrap the last option drops
+   onto a second line and overlaps whatever is beneath it. The colour is set
+   from JS to whichever wave is selected. */
+div:has(input[type="radio"]) {
+  white-space: nowrap;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+input[type="radio"] {
+  accent-color: currentColor;
+  margin: 0 5px 0 10px;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
-  background: #eee;
+  background: rgba(255, 255, 255, 0.3);
   height: 1px;
-  width: 50px;
+  width: 64px;
   border-radius: 4px;
   outline: none;
+  cursor: pointer;
 }
-/* Target the slider thumb */
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 8px;
   height: 8px;
-  background: #ffffff;
+  background: #dddde2;
   border-radius: 50%;
   cursor: pointer;
 }
-button {
-  white-space: nowrap;
-  background-color: #eee;
-  border: none;
-  color: black;
-  padding: 10px 20px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin: 4px 2px;
-  cursor: pointer;
-  min-width: 230px;
-}
-button:hover {
-  background-color: black;
-  border: 1px solid white;
-  color: white;
-}
-
-/* input[type="radio"] {
-  display: none;
-} */
-
-/* p5 builds the radio as inline labels; without this the last option wraps
-   onto a second line and overlaps whatever is beneath it. */
-div:has(> input[type="radio"]) {
-  white-space: nowrap;
-}
-
-/* #my-canvas {
-  display: block;
-  width: 80%;
-  height: 80%;
-  margin: auto;
-} */

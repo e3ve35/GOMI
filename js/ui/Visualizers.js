@@ -14,6 +14,22 @@ export function createVisualizers() {
 export function drawVisualizers() {
   drawAmplitude();
   drawSpectrum();
+  drawPanelCaptions();
+}
+
+// All three panel labels drawn together, so they share one baseline and one
+// style instead of each panel captioning itself differently.
+function drawPanelCaptions() {
+  const L = state.layout;
+  push();
+  noStroke();
+  fill(...COLORS.caption);
+  textSize(11);
+  textAlign(LEFT, BOTTOM);
+  text("amplitude", L.amp.x, L.captionY);
+  text("envelope", L.env.x, L.captionY);
+  text("frequency", L.fft.x, L.captionY);
+  pop();
 }
 
 // I completed part of this function following this tutorial
@@ -25,7 +41,7 @@ function drawSpectrum() {
 
   var spectrum = fft.analyze();
   noStroke();
-  fill(0, 255, 0);
+  fill(COLORS.spectrum);
   var fftWidth = box.w;
   var fftHeight = box.h;
 
@@ -35,10 +51,6 @@ function drawSpectrum() {
     rect(x, fftHeight - h, fftWidth / spectrum.length, h);
   }
 
-  noStroke();
-  fill(0, 0, 0);
-  textSize(12);
-  text("frequency", fftWidth - 40, fftHeight + 10);
   pop();
 }
 
@@ -49,12 +61,6 @@ function drawAmplitude() {
   push();
   const box = state.layout.amp;
   translate(box.x + box.w / 2, box.y + box.h / 2);
-  push();
-  noStroke();
-  fill(COLORS.content);
-  text("amplitude", 0, 0);
-  pop();
-
   stroke(COLORS.content);
   noFill();
   beginShape();
