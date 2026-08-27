@@ -13,29 +13,104 @@ export const COLORS = {
 };
 
 export const GRID = {
-  topY: 100,
   cellWidth: 20,
-  cellHeight: 16,
   dotSize: 7,
   // How far the drag hint reaches when there is room for it.
   ghostColumns: 3,
   hoverScale: 1.6,
-  xRatio: 0.04,
-  wRatio: 0.95,
+  // Row height is derived from the available height, within these bounds.
+  minCellHeight: 12,
+  maxCellHeight: 24,
 };
 
-export const LAYOUT = {
-  fftX: 0.65, fftY: 500, fftWidth: 200, fftHeight: 150,
-  ampX: 0.1, ampY: 0.81, ampRadius: 80,
-  envX: 0.25, envY: 0.677, envWidth: 350, envHeight: 150,
-  radioX: 1090, radioY: 470,
-  // Same row as the wave-type radio and ABOVE the FFT panel (y 500-650 at
-  // x 926-1126): p5 renders DOM controls over the canvas, so placing these
-  // lower would cover the spectrum bars.
-  rootX: 760, rootY: 470,
-  scaleX: 870, scaleY: 470,
-  sliderX: 40, sliderY: 462,
+// One spacing scale for the whole page. Everything below is derived from it,
+// so the layout holds together at any window size rather than only at the
+// 1425x738 the canvas used to be hardcoded to.
+export const SPACING = {
+  pad: 26,
+  gap: 22,
+  headerH: 58,
+  controlsH: 30,
+  panelH: 170,
+  labelW: 34, // room for the row labels drawn left of the grid
+  ampW: 170,
+  fftW: 230,
+  buttonsW: 250,
+  buttonH: 40,
+  buttonGap: 12,
+  // Below this the layout stops shrinking and the page scrolls instead, which
+  // is a deliberate floor rather than letting the panels collapse into each other.
+  minW: 1180,
+  minH: 640,
 };
+
+export function computeLayout(w, h) {
+  const S = SPACING;
+  w = Math.max(Math.round(w), S.minW);
+  h = Math.max(Math.round(h), S.minH);
+
+  // Bottom up: panels sit on the floor, the control row above them, and the
+  // grid takes whatever height is left.
+  const panelY = h - S.pad - S.panelH;
+  const controlsY = panelY - S.controlsH - S.gap;
+  const gridY = S.headerH;
+
+  const grid = {
+    x: S.pad + S.labelW,
+    y: gridY,
+    w: w - 2 * S.pad - S.labelW,
+    h: controlsY - S.gap - gridY,
+  };
+
+  // Three panels of different natural shapes - a circle, a curve with its own
+  // slider column, a spectrum - sharing one baseline and equal gutters. The
+  // envelope absorbs the slack so it always has room for its controls.
+  const envW = w - 2 * S.pad - S.ampW - S.fftW - S.buttonsW - 3 * S.gap;
+
+  const amp = { x: S.pad, y: panelY, w: S.ampW, h: S.panelH };
+  const env = { x: amp.x + amp.w + S.gap, y: panelY, w: envW, h: S.panelH };
+  const fft = { x: env.x + env.w + S.gap, y: panelY, w: S.fftW, h: S.panelH };
+  const buttons = { x: fft.x + fft.w + S.gap, y: panelY, w: S.buttonsW, h: S.panelH };
+
+  env.graphW = Math.round(env.w * 0.5);
+  env.sliderX = env.x + env.graphW + 20;
+  env.labelX = env.sliderX + 58;
+
+  // Measured against the rendered controls; the visual pass pins these
+  // widths in CSS so they stop being estimates.
+  const radioW = 315;
+  const scaleW = 140;
+  const rootW = 52;
+  const radioX = w - S.pad - radioW;
+  const scaleX = radioX - S.gap - scaleW;
+  const rootX = scaleX - 10 - rootW;
+
+  return {
+    w,
+    h,
+    titleY: Math.round(S.headerH / 2),
+    grid,
+    amp,
+    env,
+    fft,
+    buttons,
+    captionY: panelY - 10,
+    controls: {
+      y: controlsY,
+      sliderX: S.pad,
+      labelX: S.pad + 62,
+      rootX,
+      scaleX,
+      radioX,
+    },
+    buttonAt: (i) => ({
+      x: buttons.x,
+      y: buttons.y + i * (S.buttonH + S.buttonGap),
+      w: buttons.w,
+      h: S.buttonH,
+    }),
+  };
+}
 
 export function colorForWave(waveType) {
   return COLORS[waveType] ?? COLORS.sine;

@@ -1,6 +1,6 @@
 import { Score } from "../score/Score.js";
 import { toNyquist, downloadText } from "../nyquist.js";
-import { COLORS, GRID, LAYOUT, colorForWave } from "../config.js";
+import { COLORS, colorForWave } from "../config.js";
 import { state } from "../state.js";
 import { Scale, SCALES, midiName } from "../score/Scale.js";
 import { remapRows } from "../score/Note.js";
@@ -10,10 +10,15 @@ let createCanvasButton;
 let slider;
 let rootSelect;
 let scaleSelect;
+const buttons = [];
 
 // Controls that stay hidden until a score exists. Collected at creation so
 // create() cannot forget to reveal one.
 const hiddenUntilScore = [];
+
+// Everything playScore schedules, so it can be cancelled mid-run.
+let scheduled = [];
+let sounding = [];
 
 function hideUntilScore(control) {
   control.hide();
@@ -21,73 +26,75 @@ function hideUntilScore(control) {
   return control;
 }
 
-function transportButton(label, handler, index) {
+function transportButton(label, handler) {
   const button = createButton(label);
   button.mousePressed(handler);
-  button.position(width - 260, height * (0.66 + index * 0.08));
+  buttons.push(button);
   return hideUntilScore(button);
 }
 
-function transportSelect(addOptions, selected, x, y, handler) {
+function transportSelect(addOptions, selected, handler) {
   const select = createSelect();
   addOptions(select);
   select.selected(selected);
-  select.position(x, y);
   select.changed(handler);
   return hideUntilScore(select);
 }
 
-// Everything playScore schedules, so it can be cancelled mid-run.
-let scheduled = [];
-let sounding = [];
-
 export function createTransport() {
   // ioi control slider
   slider = createSlider(5, 100, 50);
-  slider.position(LAYOUT.sliderX, LAYOUT.sliderY);
   state.logicalStopTime = slider.value() / 100;
   slider.input(() => {
     state.logicalStopTime = slider.value() / 100;
   });
 
-  // drop down menu
+  // wave type
   state.radio = createRadio();
-  state.radio.option("sine");
-  state.radio.option("triangle");
-  state.radio.option("sawtooth");
-  state.radio.option("square");
+  ["sine", "triangle", "sawtooth", "square"].forEach((w) => state.radio.option(w));
   state.radio.selected("sine");
-  state.radio.position(LAYOUT.radioX, LAYOUT.radioY);
   state.radio.style("color", "white");
   state.radio.style("background-color", COLORS.sine + "50");
   state.radio.changed(changeRadio);
   hideUntilScore(state.radio);
 
-  // root and scale selectors
   rootSelect = transportSelect(
     (sel) => {
       for (let midi = 48; midi < 60; midi++) sel.option(midiName(midi), midi);
     },
-    "48", LAYOUT.rootX, LAYOUT.rootY, changeScale
+    "48", changeScale
   );
 
   scaleSelect = transportSelect(
     (sel) => {
       for (const name of Object.keys(SCALES)) sel.option(name);
     },
-    "major", LAYOUT.scaleX, LAYOUT.scaleY, changeScale
+    "major", changeScale
   );
 
-  // create button
   createCanvasButton = createButton("click to create a score");
   createCanvasButton.mousePressed(create);
-  createCanvasButton.position(width / 2 - 100, height * 0.3);
 
   [
     ["play", playScore],
     ["clear", clearCanvas],
     ["generate nyquist score", generateScore],
-  ].forEach(([label, handler], i) => transportButton(label, handler, i));
+  ].forEach(([label, handler]) => transportButton(label, handler));
+}
+
+// Every absolutely positioned DOM control has to be moved when the window
+// changes size - p5 positions them once at creation and never again.
+export function layoutTransport(L) {
+  slider.position(L.controls.sliderX, L.controls.y);
+  state.radio.position(L.controls.radioX, L.controls.y);
+  rootSelect.position(L.controls.rootX, L.controls.y);
+  scaleSelect.position(L.controls.scaleX, L.controls.y);
+  createCanvasButton.position(L.w / 2 - 115, L.grid.y + L.grid.h / 2 - 20);
+  buttons.forEach((button, i) => {
+    const box = L.buttonAt(i);
+    button.position(box.x, box.y);
+    button.style("width", box.w + "px");
+  });
 }
 
 export function scoreDurationSeconds(notes, secondsPerCol) {
@@ -137,9 +144,10 @@ export function playScore() {
 
 function create() {
   if (state.score) return;
-  state.score = new Score(GRID.topY);
+  state.score = new Score(state.layout);
   createCanvasButton.hide();
   hiddenUntilScore.forEach((control) => control.show());
+  layoutTransport(state.layout);
 }
 
 function clearCanvas() {
@@ -151,6 +159,7 @@ function changeScale() {
   const score = state.score;
   if (!score) return;
   score.scale = new Scale(Number(rootSelect.value()), scaleSelect.value(), 3);
+  score.refit();
   score.notes = remapRows(score.notes, score.scale.rowCount);
 }
 

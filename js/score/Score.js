@@ -3,17 +3,31 @@ import { Scale } from "./Scale.js";
 import { noteAt, ghostLength } from "./Note.js";
 
 export class Score {
-  constructor(y, scale = new Scale()) {
-    this.x = width * GRID.xRatio;
-    this.y = y;
-    this.w = width * GRID.wRatio;
-    this.cellWidth = GRID.cellWidth;
-    this.cellHeight = GRID.cellHeight;
+  constructor(layout, scale = new Scale()) {
     this.scale = scale;
-    // ceil, not floor: the last dot centre sits at x + (cols-1)*cellWidth,
-    // which still fits inside w - flooring would silently drop a usable column.
-    this.cols = Math.ceil(this.w / this.cellWidth);
     this.notes = [];
+    this.applyLayout(layout);
+  }
+
+  applyLayout(layout) {
+    const g = layout.grid;
+    this.x = g.x;
+    this.y = g.y;
+    this.w = g.w;
+    this.availH = g.h;
+    this.cellWidth = GRID.cellWidth;
+    this.cols = Math.max(1, Math.floor(this.w / this.cellWidth));
+    this.refit();
+  }
+
+  // Row height follows the space available, so a taller window gets a roomier
+  // grid and a shorter one still fits every row. Called again when the scale
+  // changes, since a pentatonic has fewer rows to share the same height.
+  refit() {
+    this.cellHeight = Math.min(
+      GRID.maxCellHeight,
+      Math.max(GRID.minCellHeight, Math.floor(this.availH / this.rows))
+    );
   }
 
   get rows() {

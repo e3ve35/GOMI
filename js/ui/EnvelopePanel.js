@@ -11,24 +11,26 @@ const CONTROLS = [
 ];
 
 export class EnvelopePanel {
-  constructor(x, y, w, h) {
-    this.x = x;
-    this.y = y;
-    this.w = w;
-    this.h = h;
+  constructor(box) {
     // Not a slider: p5's envelope always releases to silence.
     this.releaseLevel = 0;
-
-    this.sliderX = this.x + this.w + 20;
-    this.sliderY = this.y + 20;
-    this.sliderTextX = this.sliderX + 50;
-    this.sliderTextY = this.sliderY - 7;
-
     this.sliders = new Map();
-    for (const [name, initial, dy] of CONTROLS) {
-      const slider = createSlider(0, 1, initial, 0.01);
-      slider.position(this.sliderX, this.sliderY + dy);
-      this.sliders.set(name, slider);
+    for (const [name, initial] of CONTROLS) {
+      this.sliders.set(name, createSlider(0, 1, initial, 0.01));
+    }
+    this.applyLayout(box);
+  }
+
+  applyLayout(box) {
+    this.x = box.x;
+    this.y = box.y;
+    this.w = box.graphW;
+    this.h = box.h;
+    this.sliderX = box.sliderX;
+    this.sliderY = box.y + 14;
+    this.labelX = box.labelX;
+    for (const [name, , dy] of CONTROLS) {
+      this.sliders.get(name).position(this.sliderX, this.sliderY + dy);
     }
   }
 
@@ -79,7 +81,7 @@ export class EnvelopePanel {
     fill(COLORS.content);
     noStroke();
     for (const [name, , dy] of CONTROLS) {
-      text(`${name}: ${this.value(name)}`, this.sliderTextX, this.sliderTextY + dy);
+      text(`${name}: ${this.value(name)}`, this.labelX, this.sliderY + dy + 7);
     }
     pop();
   }

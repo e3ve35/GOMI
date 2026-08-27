@@ -1,4 +1,5 @@
 export const state = {
+  layout: null,
   score: null,
   logicalStopTime: 1,
   playing: false,

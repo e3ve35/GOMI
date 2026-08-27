@@ -5,8 +5,16 @@
 * {
   font-family: roboto;
 }
+html,
 body {
+  margin: 0;
+  padding: 0;
   background-color: black;
+}
+/* Without this the canvas is inline, and its line-height descender adds a few
+   pixels below it - enough to raise a scrollbar on a page sized to the window. */
+canvas {
+  display: block;
 }
 .p5-slider-container {
   width: 100%;
@@ -35,6 +43,7 @@ input[type="range"]::-webkit-slider-thumb {
   cursor: pointer;
 }
 button {
+  white-space: nowrap;
   background-color: #eee;
   border: none;
   color: black;
@@ -57,8 +66,10 @@ button:hover {
   display: none;
 } */
 
-label.radio {
-  display: block;
+/* p5 builds the radio as inline labels; without this the last option wraps
+   onto a second line and overlaps whatever is beneath it. */
+div:has(> input[type="radio"]) {
+  white-space: nowrap;
 }
 
 /* #my-canvas {

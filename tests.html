@@ -13,6 +13,7 @@
       import { toNyquist } from "./js/nyquist.js";
       import { scoreDurationSeconds } from "./js/ui/Transport.js";
       import { Scale, SCALES, midiName } from "./js/score/Scale.js";
+      import { computeLayout, SPACING } from "./js/config.js";
       import { Note, noteAt, maxLengthFor, remapRows, ghostLength } from "./js/score/Note.js";
       import { headroomLevel, FULL_SCALE_PEAK, VOICE_LEVEL, CLEAN_VOICES } from "./js/audio/Voice.js";
 
@@ -227,6 +228,76 @@
 
       test("ghostLength ignores notes in other rows", () => {
         eq(ghostLength([new Note(5, 11, 1)], 0, 10, 68, 3), 3);
+      });
+
+
+      const boxesOverlap = (a, b) =>
+        a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+
+      test("computeLayout keeps everything inside the viewport", () => {
+        for (const [w, h] of [[1280, 720], [1440, 900], [1512, 860], [1920, 1080]]) {
+          const L = computeLayout(w, h);
+          for (const [name, box] of Object.entries({ grid: L.grid, amp: L.amp, env: L.env, fft: L.fft, buttons: L.buttons })) {
+            if (box.x < 0 || box.y < 0 || box.x + box.w > L.w || box.y + box.h > L.h) {
+              throw new Error(`${name} escapes the viewport at ${w}x${h}: ` + JSON.stringify(box));
+            }
+          }
+        }
+      });
+
+      test("computeLayout never overlaps the grid with the panels", () => {
+        for (const [w, h] of [[1280, 720], [1440, 900], [1512, 860]]) {
+          const L = computeLayout(w, h);
+          for (const [name, box] of Object.entries({ amp: L.amp, env: L.env, fft: L.fft, buttons: L.buttons })) {
+            if (boxesOverlap(L.grid, box)) throw new Error(`${name} overlaps the grid at ${w}x${h}`);
+          }
+        }
+      });
+
+      test("the panels never overlap each other", () => {
+        const L = computeLayout(1280, 720);
+        const boxes = [["amp", L.amp], ["env", L.env], ["fft", L.fft], ["buttons", L.buttons]];
+        for (let i = 0; i < boxes.length; i++) {
+          for (let j = i + 1; j < boxes.length; j++) {
+            if (boxesOverlap(boxes[i][1], boxes[j][1])) {
+              throw new Error(`${boxes[i][0]} overlaps ${boxes[j][0]}`);
+            }
+          }
+        }
+      });
+
+      test("the panels share one baseline", () => {
+        const L = computeLayout(1512, 860);
+        eq(L.amp.y, L.env.y);
+        eq(L.fft.y, L.env.y);
+        eq(L.amp.y + L.amp.h, L.env.y + L.env.h);
+      });
+
+      test("computeLayout clamps below the minimum window size", () => {
+        const L = computeLayout(400, 300);
+        eq(L.w, SPACING.minW);
+        eq(L.h, SPACING.minH);
+      });
+
+      test("a taller window gives the grid more height", () => {
+        const short = computeLayout(1440, 700);
+        const tall = computeLayout(1440, 1000);
+        if (tall.grid.h <= short.grid.h) throw new Error("grid did not grow with the window");
+      });
+
+      test("a wider window gives the grid more width", () => {
+        const narrow = computeLayout(1280, 800);
+        const wide = computeLayout(1920, 800);
+        if (wide.grid.w <= narrow.grid.w) throw new Error("grid did not widen with the window");
+      });
+
+      test("the envelope panel keeps room for its slider column", () => {
+        for (const w of [1200, 1280, 1440, 1920]) {
+          const L = computeLayout(w, 800);
+          if (L.env.labelX + 120 > L.env.x + L.env.w) {
+            throw new Error(`envelope labels overflow its panel at width ${w}`);
+          }
+        }
       });
 
       out.innerHTML += `<h2 class="${failed ? "fail" : "pass"}">${passed} passed, ${failed} failed</h2>`;
