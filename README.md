@@ -28,6 +28,7 @@
   - [Canvas](#canvas)
   - [Graphs and Visualizations](#graphs-and-visualizations)
   - [Tools](#tools)
+  - [Running it locally](#running-it-locally)
 - [✍️ Author ](#️-author-)
 - [🎉 Acknowledgements ](#-acknowledgements-)
 
@@ -36,63 +37,63 @@
 The [Graphical Online Music Interface](https://e3ve35.github.io/GOMI/) is a website that enables users to create music compositions through visual interactions. The goal of this project is to simplify the process of composing and adjusting computer music scores by visualizing sound synthesis parameters and providing real-time audible feedback. My motivation for starting this project was to enhance the user experience of computer music composition and make it more accessible for everyone.
 
 ## 🏁 How to Use <a name = "how-to-use"></a>
-Here is a short [video](https://drive.google.com/file/d/1C2H45D9KcqhJANld2xrkzmR-PqM5Wae2/view?usp=sharing) demonstrating how to use the interface.
 
-The following instructions will walk you through how to use and comprehend each part of GOMI.
-  - First, follow this [link](https://e3ve35.github.io/GOMI/) to access the interface.
+Open the interface here: **[e3ve35.github.io/GOMI](https://e3ve35.github.io/GOMI/)**
+
+> There is also a short [video](https://drive.google.com/file/d/1C2H45D9KcqhJANld2xrkzmR-PqM5Wae2/view?usp=sharing) walkthrough, but it shows an earlier version of GOMI — recorded before notes had length and before the grid became scale-based.
+
   ### Canvas
-  - The upper half of the page consists of a canvas. To start your composition, click on the "click to create a score" button. 
+  - The upper half of the page is the canvas. To start, click the **"click to create a score"** button.
+  - You will then see a grid of dots. The vertical axis is pitch and the horizontal axis is time. Each row is a degree of the chosen scale across three octaves (C3 up to C6 by default), so every dot on the grid is in key — there is no wrong note to land on.
     <p align="center">
-      <img src="images/canvas1.png" style="height: 150px;" >
+      <img src="images/canvas2.png" style="height: 260px;" >
     </p>
-  - After that, you will see a grid of dots. The y-axis denotes pitch and the x-axis denotes time. Each row is a degree of the chosen scale, spanning three octaves, so every dot on the grid is in key.
+  - **Writing a note.** Press a dot and it sounds immediately, holding for as long as the mouse is down. Drag to the right and release to give the note a length: the dot stretches into a capsule spanning the columns it covers. A press with no drag makes the shortest possible note.
+  - Hovering an empty dot previews that gesture — the dot brightens and a faint capsule with an arrow shows how far you could drag. It stops short when another note is in the way, so it never offers room you cannot actually take.
     <p align="center">
-      <img src="images/canvas2.png" style="height: 150px;" >
+      <img src="images/canvas3.png" style="height: 90px;" >
     </p>
-  - Press on one of the dots. You will hear the note immediately, and it sounds for as long as you hold the mouse down. Drag to the right before releasing to give the note a length: it grows from a dot into a capsule spanning the columns it covers. A press with no drag makes the shortest possible note.
-    <p align="center">
-      <img src="images/canvas3.png" style="height: 150px;" >
-    </p>
-  - You can switch between different type of waves you want to use in your sound synthesis. There are 4 options: sine, triangle, sawtooth, and square. Select one of them then click on the canvas, you will hear different results.
-  - Two dropdowns next to the wave selector set the root note and the scale (major, minor, dorian, major pentatonic, minor pentatonic). Changing either re-tunes the whole grid. Your notes keep their positions and are re-pitched into the new scale, so switching from major to minor transposes what you have written rather than discarding it.
-  - Sounds produced from different waves are represented by different colors of dots on canvas. See below for an example. The sounds made from square wave are blue on the canvas, whereas sounds made from triangle waves are green, and sine waves are white.
-    <p align="center">
-      <img src="images/canvas4.png" style="height: 150px;" >
-    </p>
-  - To erase a note, click it again. Clicking anywhere along a long note removes the whole note.
-  
+  - **Erasing.** Click a note again to remove it. Clicking anywhere along a long note removes the whole note.
+  - **Wave type.** Choose between sine, triangle, sawtooth, and square. Each colours its notes differently on the canvas: sine is white, triangle green, sawtooth teal, and square blue — so you can read the arrangement at a glance.
+  - **Root and scale.** Two dropdowns beside the wave selector set the root note and the scale (major, minor, dorian, major pentatonic, minor pentatonic). Changing either re-tunes the whole grid. Your notes keep their positions and are re-pitched into the new scale, so switching from major to minor transposes what you have written rather than discarding it.
+  - **logical-stop-time.** The slider on the left sets how long a single column lasts, in seconds.
+
   ### Graphs and Visualizations
-  - On the bottom left corner, you will find a small circle representing the amplitude graph of your composition. Its shape changes as the loudness of your composition fluctuates. (I implemented this visualization following the [tutorial](https://www.youtube.com/watch?v=jEwAMgcCgOA&list=PLRqwX-V7Uu6aFcVjlDAkkGIixw70s7jpW&index=10&ab_channel=TheCodingTrain) made by The Coding Train)
-    <p align="center">
-      <img src="images/amp.png" style="width: 200px; height: 200px;" >
-    </p>
-  - On the right of the amplitude graph, you can find a envelope graph. Try adjusting the slider next to the graph, you will hear slightly different sounds as you click on each note on the canvas. Check out this link if you want to know more about how [ADSR and envelopes](https://en.wikipedia.org/wiki/Envelope_(music)) work.
-    <p align="center">
-      <img src="images/env.png" style=" height: 200px;" >
-    </p>
-  - On the bottom right corner you will find a green graph that changes as sounds are being played. This is a Fourier Transform visualization that represents the amplitude of each frequency that is currently being played.
-    <p align="center">
-      <img src="images/fft.png" style=" height: 200px;" >
-    </p>
-  
+  <p align="center">
+    <img src="images/panels.png" style="height: 200px;" >
+  </p>
+
+  - **amplitude** (left) — a circle whose shape deforms as the loudness of your composition fluctuates. (Implemented following this [tutorial](https://www.youtube.com/watch?v=jEwAMgcCgOA&list=PLRqwX-V7Uu6aFcVjlDAkkGIixw70s7jpW&index=10&ab_channel=TheCodingTrain) by The Coding Train.)
+  - **envelope** (middle) — the [ADSR](https://en.wikipedia.org/wiki/Envelope_(music)) shape applied to every note. The sliders beside it set attack, decay and release times plus attack and sustain levels; adjust them and the next note you play sounds different.
+  - **frequency** (right) — a Fourier transform of whatever is sounding right now, showing the amplitude of each frequency component.
+
   ### Tools
-  - After drawing your score, you can hear the ourcome by clicking on the "play" button on the bottom right corner of the page. Note that the notes are being played overtime. The first(leftmost) column of the dots on the canvas represents time 0, and so on. If you want to hear the outcome sound immediately, you may want to start your composition from the first column. The current note that is being played will slowly expand and shrink.
-  - You can clear the entire canvas by clicking on the "clear" button.
-    <p align="center">
-      <img src="images/buttons.png" style="height: 150px;" >
-    </p>
-  - You can click on the third button to generate a score in [Nyquist](https://www.cs.cmu.edu/~rbd/doc/nyquist/) format. It will download a score.txt file on your computer in the below form, which you can easily copy and paste into the Nyquist IDE and play it using the instruments you defined.
+  - **play** renders your score over time, starting from the leftmost column. Notes light up as they sound, and each one holds for the length you drew.
+  - **clear** empties the canvas and stops anything currently playing.
+  - **generate nyquist score** downloads a `score.txt` in [Nyquist](https://www.cs.cmu.edu/~rbd/doc/nyquist/) format, which you can paste into the Nyquist IDE and play with your own instrument definitions. Each entry is `{start duration {instrument pitch: midi}}`, and the durations match the lengths you drew. This is the exact export of the score pictured above:
     ```
-      {
-      {0.00 0.36 {sine-instr pitch: 60}} 
-      {0.00 1.44 {sine-instr pitch: 67}} 
-      {0.36 0.72 {sine-instr pitch: 64}} 
-      {1.08 0.36 {triangle-instr pitch: 69}} 
-      {1.44 2.16 {sine-instr pitch: 72}} 
-      {2.16 0.36 {sine-instr pitch: 65}} 
-      {2.52 1.08 {triangle-instr pitch: 62}} 
-      {3.60 0.36 {sine-instr pitch: 67}} 
-      }
+    {
+     {0.00 5.00 {sine-instr pitch: 48}} 
+     {0.00 2.00 {triangle-instr pitch: 53}} 
+     {2.50 1.50 {triangle-instr pitch: 57}} 
+     {4.50 3.00 {triangle-instr pitch: 60}} 
+     {6.00 5.00 {sine-instr pitch: 50}} 
+     {8.00 1.50 {sawtooth-instr pitch: 64}} 
+     {10.00 1.00 {sawtooth-instr pitch: 65}} 
+     {11.50 2.50 {sawtooth-instr pitch: 67}} 
+     {12.00 6.50 {sine-instr pitch: 52}} 
+     {14.50 2.00 {square-instr pitch: 71}} 
+     {17.00 1.50 {square-instr pitch: 72}} 
+    }
+    ```
+
+  ### Running it locally
+  GOMI is plain ES modules with no build step, but it does need to be served over HTTP rather than opened as a file:
+  ```bash
+  python3 -m http.server 8000
+  ```
+  Then open `http://localhost:8000/`. The unit tests live at `http://localhost:8000/tests.html` and report a pass/fail count in the page.
+
 ## ✍️ Author <a name = "author"></a>
 
 - [@e3ve35](https://github.com/e3ve35) - Idea & Initial work
