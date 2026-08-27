@@ -45,3 +45,10 @@ export function remapRows(notes, newRowCount) {
   }
   return [...kept.values()];
 }
+
+// How long the drag hint may show at (row, startCol): the length we would
+// like, clipped to the room that actually exists. Returns 1 when the next
+// cell is taken - the hint must never promise space a drag cannot take.
+export function ghostLength(notes, row, startCol, totalCols, desired) {
+  return Math.min(desired, maxLengthFor(notes, row, startCol, totalCols));
+}

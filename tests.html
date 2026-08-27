@@ -13,7 +13,7 @@
       import { toNyquist } from "./js/nyquist.js";
       import { scoreDurationSeconds } from "./js/ui/Transport.js";
       import { Scale, SCALES, midiName } from "./js/score/Scale.js";
-      import { Note, noteAt, maxLengthFor, remapRows } from "./js/score/Note.js";
+      import { Note, noteAt, maxLengthFor, remapRows, ghostLength } from "./js/score/Note.js";
       import { headroomLevel, FULL_SCALE_PEAK, VOICE_LEVEL, CLEAN_VOICES } from "./js/audio/Voice.js";
 
       let passed = 0, failed = 0;
@@ -206,6 +206,27 @@
         if (VOICE_LEVEL * FULL_SCALE_PEAK < 0.1) {
           throw new Error(`single note peaks at only ${(VOICE_LEVEL * FULL_SCALE_PEAK).toFixed(3)}`);
         }
+      });
+
+
+      test("ghostLength shows the full hint when nothing is in the way", () => {
+        eq(ghostLength([], 0, 10, 68, 3), 3);
+      });
+
+      test("ghostLength is clipped by the grid edge", () => {
+        eq(ghostLength([], 0, 66, 68, 3), 2);
+      });
+
+      test("ghostLength is clipped by the next note in the row", () => {
+        eq(ghostLength([new Note(0, 12, 1)], 0, 10, 68, 3), 2);
+      });
+
+      test("ghostLength collapses to 1 when the next cell is taken", () => {
+        eq(ghostLength([new Note(0, 11, 1)], 0, 10, 68, 3), 1);
+      });
+
+      test("ghostLength ignores notes in other rows", () => {
+        eq(ghostLength([new Note(5, 11, 1)], 0, 10, 68, 3), 3);
       });
 
       out.innerHTML += `<h2 class="${failed ? "fail" : "pass"}">${passed} passed, ${failed} failed</h2>`;

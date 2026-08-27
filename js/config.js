@@ -6,6 +6,10 @@ export const COLORS = {
   sawtooth: "#5FB49C",
   square: "#414288",
   cell: [171, 169, 200, 150],
+  // The drag hint. Faint enough to read as an affordance rather than content;
+  // the chevron is brighter so the direction registers at a glance.
+  ghost: [255, 255, 255, 38],
+  ghostTip: [255, 255, 255, 110],
 };
 
 export const GRID = {
@@ -13,6 +17,9 @@ export const GRID = {
   cellWidth: 20,
   cellHeight: 16,
   dotSize: 7,
+  // How far the drag hint reaches when there is room for it.
+  ghostColumns: 3,
+  hoverScale: 1.6,
   xRatio: 0.04,
   wRatio: 0.95,
 };
