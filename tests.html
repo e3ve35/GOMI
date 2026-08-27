@@ -14,6 +14,7 @@
       import { scoreDurationSeconds } from "./js/ui/Transport.js";
       import { Scale, SCALES, midiName } from "./js/score/Scale.js";
       import { Note, noteAt, maxLengthFor, remapRows } from "./js/score/Note.js";
+      import { headroomLevel, FULL_SCALE_PEAK, VOICE_LEVEL, CLEAN_VOICES } from "./js/audio/Voice.js";
 
       let passed = 0, failed = 0;
       const out = document.getElementById("out");
@@ -21,6 +22,12 @@
         try { fn(); passed++; out.innerHTML += `<div class="pass">PASS ${name}</div>`; }
         catch (e) { failed++; out.innerHTML += `<div class="fail">FAIL ${name}</div><pre>${e.message}</pre>`; }
       }
+      function close(actual, expected, tol = 1e-9) {
+        if (Math.abs(actual - expected) > tol) {
+          throw new Error(`expected ${expected} +/- ${tol}, got ${actual}`);
+        }
+      }
+
       function eq(actual, expected) {
         if (actual !== expected) {
           throw new Error(`expected: ${JSON.stringify(expected)}\nactual:   ${JSON.stringify(actual)}`);
@@ -175,6 +182,30 @@
 
       test("scoreDurationSeconds of an empty score is zero", () => {
         eq(scoreDurationSeconds([], 0.5), 0);
+      });
+
+
+      test("headroomLevel keeps a full chord under the clipping ceiling", () => {
+        close(headroomLevel(6, 0.9) * 6 * FULL_SCALE_PEAK, 0.9);
+      });
+
+      test("headroomLevel never amplifies past unity", () => {
+        eq(headroomLevel(1, 0.9), 1);
+      });
+
+      test("the shipped voice level leaves CLEAN_VOICES notes unclipped", () => {
+        if (VOICE_LEVEL * CLEAN_VOICES * FULL_SCALE_PEAK > 1) {
+          throw new Error(
+            `${CLEAN_VOICES} voices reach ` +
+            `${(VOICE_LEVEL * CLEAN_VOICES * FULL_SCALE_PEAK).toFixed(3)} at master`
+          );
+        }
+      });
+
+      test("a single note is still clearly audible", () => {
+        if (VOICE_LEVEL * FULL_SCALE_PEAK < 0.1) {
+          throw new Error(`single note peaks at only ${(VOICE_LEVEL * FULL_SCALE_PEAK).toFixed(3)}`);
+        }
       });
 
       out.innerHTML += `<h2 class="${failed ? "fail" : "pass"}">${passed} passed, ${failed} failed</h2>`;
