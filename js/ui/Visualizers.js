@@ -6,6 +6,13 @@ const amphistory = [];
 
 export function createVisualizers() {
   fft = new p5.FFT(0, 32);
+  // The byte spectrum is scaled from minDecibels up, and the Web Audio
+  // default of -100dBFS is far below anything this instrument can make
+  // audible: a note at the lowest usable envelope still peaks tens of dB
+  // above it. Raising the floor to -70 keeps every real note full-scale
+  // while reading true silence - and any inaudible residual a stopped
+  // voice leaves behind - as zero rather than a permanent low bar.
+  fft.analyser.minDecibels = SPECTRUM_FLOOR_DB;
   amp = new p5.Amplitude();
   amphistory.length = 0;
   for (let i = 0; i < 360; i++) amphistory.push(0);
@@ -35,6 +42,9 @@ function drawPanelCaptions() {
 // Below this a bin reads as the analyser's own noise floor rather than
 // anything audible, so it's drawn as silence instead of a stray sliver.
 const SPECTRUM_NOISE_FLOOR = 3;
+
+// Quietest level the panel treats as sound. See createVisualizers.
+const SPECTRUM_FLOOR_DB = -70;
 
 // I completed part of this function following this tutorial
 // https://www.youtube.com/watch?v=2O3nm0Nvbi4&ab_channel=TheCodingTrain

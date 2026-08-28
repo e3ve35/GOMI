@@ -21,9 +21,9 @@ export class Voice {
     this.env = new p5.Envelope();
     this.osc = new p5.Oscillator("sine");
     this.osc.amp(this.env);
-    this.osc.start();
     this.lastUsed = 0;
     this.token = 0;
+    this.releaseTime = 0;
   }
 
   // p5.Envelope.play(unit, startTime, sustainTime) is unusable for this: its
@@ -36,6 +36,13 @@ export class Voice {
     // setADSR's sustain is a ratio of this range, so scaling the attack level
     // scales the whole envelope and keeps the drawn ADSR shape intact.
     this.env.setRange(adsr.attackLevel * VOICE_LEVEL, adsr.releaseLevel);
+    this.releaseTime = adsr.releaseTime;
+    // Started per note rather than once at construction: a p5.Envelope
+    // releases to a tiny non-zero floor, so sixteen idle oscillators sum to
+    // a permanent ~-76dBFS hum that the FFT panel draws as a bar with
+    // nothing playing. start() on an already-started oscillator swaps in a
+    // fresh node, so this also covers a stolen voice.
+    this.osc.start();
     this.osc.setType(waveType);
     this.osc.freq(freq);
     this.env.triggerAttack();
@@ -47,5 +54,9 @@ export class Voice {
   noteOff(token) {
     if (token !== this.token) return;
     this.env.triggerRelease();
+    // Stop once the release has finished, so the voice contributes exactly
+    // nothing while idle. A voice stolen before this fires is unaffected:
+    // noteOn's start() has already replaced the node this would silence.
+    this.osc.stop(this.releaseTime + 0.05);
   }
 }
