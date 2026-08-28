@@ -12,7 +12,7 @@ export class Score {
   applyLayout(layout) {
     const g = layout.grid;
     this.x = g.x;
-    this.y = g.y;
+    this.gridTop = g.y;
     this.w = g.w;
     this.availH = g.h;
     this.cellWidth = GRID.cellWidth;
@@ -28,6 +28,10 @@ export class Score {
       GRID.maxCellHeight,
       Math.max(GRID.minCellHeight, Math.floor(this.availH / this.rows))
     );
+    // A scale with few rows cannot spend all the height it is given once the
+    // cells hit their cap, so the leftover is split above and below instead
+    // of pooling into one conspicuous band between the grid and the controls.
+    this.y = this.gridTop + Math.max(0, Math.floor((this.availH - this.h) / 2));
   }
 
   get rows() {

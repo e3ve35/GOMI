@@ -30,8 +30,11 @@ export const GRID = {
   ghostColumns: 3,
   hoverScale: 1.6,
   // Row height is derived from the available height, within these bounds.
+  // The cap sits a little above cellWidth: a five-note scale has too few rows
+  // to spend the grid's height at 24, and the leftover showed up as a wide
+  // empty band above the controls. Past this the dots read as stretched.
   minCellHeight: 12,
-  maxCellHeight: 24,
+  maxCellHeight: 28,
 };
 
 // One spacing scale for the whole page. Everything below is derived from it,
