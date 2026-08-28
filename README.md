@@ -71,6 +71,7 @@ Open the interface here: **[e3ve35.github.io/GOMI](https://e3ve35.github.io/GOMI
   ### Tools
   - **play** renders your score over time, starting from the leftmost column. Notes light up as they sound, and each one holds for the length you drew.
   - **clear** empties the canvas and stops anything currently playing.
+  - **export wav** records the score and downloads it as `gomi.wav`, 16-bit mono at whatever rate your browser runs its audio at. It records the output you hear rather than rendering the score a second time, so the file has the glides, envelopes and mixing exactly as played - which means it takes as long as the piece and plays aloud while it runs. The button reads `recording...` until it is done, and the recording stays open past the last note so its release is in the file.
   - **generate nyquist score** downloads a `score.txt` in [Nyquist](https://www.cs.cmu.edu/~rbd/doc/nyquist/) format, which you can paste into the Nyquist IDE and play with your own instrument definitions. Each entry is `{start duration {instrument pitch: midi}}`, and the durations match the lengths you drew. This is the exact export of the score pictured above:
     ```
     {

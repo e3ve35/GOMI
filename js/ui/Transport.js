@@ -1,10 +1,12 @@
 import { Score } from "../score/Score.js";
-import { toNyquist, downloadText } from "../nyquist.js";
+import { toNyquist, downloadText, downloadBlob } from "../nyquist.js";
 import { colorForWave } from "../config.js";
 import { state } from "../state.js";
 import { Scale, SCALES, midiName } from "../score/Scale.js";
 import { remapRows } from "../score/Note.js";
 import { audio } from "../audio/AudioEngine.js";
+import { recorder } from "../audio/Recorder.js";
+import { encodeWav, fadeOut } from "../audio/wav.js";
 
 let createCanvasButton;
 let slider;
@@ -19,6 +21,11 @@ const hiddenUntilScore = [];
 // Everything playScore schedules, so it can be cancelled mid-run.
 let scheduled = [];
 let sounding = [];
+
+// The export button, kept so its label can report what it is doing, and a
+// flag the transport checks before starting anything that would be recorded.
+let exportButton;
+let exporting = false;
 
 function hideUntilScore(control) {
   control.hide();
@@ -81,8 +88,10 @@ export function createTransport() {
   [
     ["play", playScore],
     ["clear", clearCanvas],
+    ["export wav", exportWav],
     ["generate nyquist score", generateScore],
   ].forEach(([label, handler]) => transportButton(label, handler));
+  exportButton = buttons[2];
 }
 
 // Every absolutely positioned DOM control has to be moved when the window
@@ -146,7 +155,7 @@ export function glideFor(note, score, secondsPerCol) {
 
 export function playScore() {
   const score = state.score;
-  if (!score || state.playing) return;
+  if (!score || state.playing || exporting) return;
   state.playing = true;
   const spc = state.logicalStopTime;
 
@@ -175,6 +184,40 @@ export function playScore() {
   scheduled.push(
     setTimeout(stopPlayback, scoreDurationSeconds(score.notes, spc) * 1000)
   );
+}
+
+// How long a recording has to run to hold the whole score: every note, plus
+// the release of the last one, which sounds after playback has stopped.
+export function exportSeconds(notes, secondsPerCol, releaseTime) {
+  if (notes.length === 0) return 0;
+  return scoreDurationSeconds(notes, secondsPerCol) + releaseTime + 0.2;
+}
+
+// Recorded rather than rendered a second time: the file is the same graph
+// that was heard, so it costs the length of the piece and plays while it runs.
+function exportWav() {
+  const score = state.score;
+  if (!score || exporting || state.playing || score.notes.length === 0) return;
+
+  const seconds = exportSeconds(score.notes, state.logicalStopTime, audio.releaseTime());
+  audio.resume();
+  recorder.start();
+  // Started before the flag is raised: playScore refuses to run while an
+  // export is in progress, and this is the one call that has to get through.
+  playScore();
+  exporting = true;
+  exportButton.html("recording...");
+
+  setTimeout(() => {
+    const { samples, sampleRate } = recorder.stop();
+    exporting = false;
+    exportButton.html("export wav");
+    if (!samples.length) return;
+    downloadBlob(
+      new Blob([encodeWav(fadeOut(samples, sampleRate), sampleRate)], { type: "audio/wav" }),
+      "gomi.wav"
+    );
+  }, seconds * 1000);
 }
 
 function create() {

@@ -10,7 +10,11 @@ export function toNyquist(notes, scale, secondsPerCol) {
 }
 
 export function downloadText(text, filename) {
-  const url = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
+  downloadBlob(new Blob([text], { type: "text/plain" }), filename);
+}
+
+export function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.download = filename;
   link.href = url;

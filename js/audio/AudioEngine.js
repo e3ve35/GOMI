@@ -39,6 +39,12 @@ class AudioEngine {
     if (handle) handle.voice.noteOff(handle.token);
   }
 
+  // A note sounds past the end of playback by its release, which a recording
+  // has to stay open for.
+  releaseTime() {
+    return this.adsr.releaseTime;
+  }
+
   voiceCount() {
     return this.voices.length;
   }

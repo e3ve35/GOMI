@@ -11,7 +11,8 @@
     <div id="out"></div>
     <script type="module">
       import { toNyquist } from "./js/nyquist.js";
-      import { scoreDurationSeconds, glideFor, soundingSeconds } from "./js/ui/Transport.js";
+      import { scoreDurationSeconds, glideFor, soundingSeconds, exportSeconds } from "./js/ui/Transport.js";
+      import { encodeWav, fadeOut } from "./js/audio/wav.js";
       import { Scale, SCALES, midiName } from "./js/score/Scale.js";
       import { computeLayout, SPACING } from "./js/config.js";
       import {
@@ -188,6 +189,55 @@
         eq(scoreDurationSeconds([], 0.5), 0);
       });
 
+
+      const readAscii = (view, at, len) =>
+        String.fromCharCode(...Array.from({ length: len }, (_, i) => view.getUint8(at + i)));
+
+      test("encodeWav writes a RIFF/WAVE header of the right size", () => {
+        const view = new DataView(encodeWav(new Float32Array(100), 48000));
+        eq(view.byteLength, 44 + 200); // header plus two bytes a sample
+        eq(readAscii(view, 0, 4), "RIFF");
+        eq(readAscii(view, 8, 4), "WAVE");
+        eq(readAscii(view, 12, 4), "fmt ");
+        eq(readAscii(view, 36, 4), "data");
+        eq(view.getUint32(4, true), 36 + 200);
+        eq(view.getUint32(40, true), 200);
+      });
+
+      test("encodeWav declares mono 16-bit PCM at the given rate", () => {
+        const view = new DataView(encodeWav(new Float32Array(4), 44100));
+        eq(view.getUint16(20, true), 1);      // PCM
+        eq(view.getUint16(22, true), 1);      // channels
+        eq(view.getUint32(24, true), 44100);  // sample rate
+        eq(view.getUint32(28, true), 88200);  // byte rate
+        eq(view.getUint16(32, true), 2);      // block align
+        eq(view.getUint16(34, true), 16);     // bits
+      });
+
+      test("encodeWav scales floats to 16-bit and clamps beyond full scale", () => {
+        const view = new DataView(encodeWav(new Float32Array([0, 1, -1, 2, -2]), 48000));
+        eq(view.getInt16(44, true), 0);
+        eq(view.getInt16(46, true), 32767);
+        eq(view.getInt16(48, true), -32768);
+        eq(view.getInt16(50, true), 32767);  // clamped, not wrapped
+        eq(view.getInt16(52, true), -32768);
+      });
+
+      test("fadeOut silences the last sample and leaves the start alone", () => {
+        const faded = fadeOut(new Float32Array(100).fill(1), 1000, 0.01); // 10 samples
+        eq(faded[0], 1);
+        eq(faded[89], 1);
+        eq(faded[99], 0);
+        if (!(faded[95] > 0 && faded[95] < 1)) throw new Error("no ramp across the fade");
+      });
+
+      test("exportSeconds covers the score, its release and a pad", () => {
+        close(exportSeconds([new Note(0, 0, 2)], 0.5, 1), 2.2);
+      });
+
+      test("exportSeconds of an empty score is zero", () => {
+        eq(exportSeconds([], 0.5, 1), 0);
+      });
 
       test("headroomLevel keeps a full chord under the clipping ceiling", () => {
         close(headroomLevel(6, 0.9) * 6 * FULL_SCALE_PEAK, 0.9);

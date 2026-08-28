@@ -52,8 +52,10 @@ export const SPACING = {
   ampW: 170,
   fftW: 230,
   buttonsW: 250,
-  buttonH: 40,
-  buttonGap: 12,
+  // Four buttons at this height and gap come to 158, which fits the 170 the
+  // panels are tall - the column ends on the same floor as its neighbours.
+  buttonH: 32,
+  buttonGap: 10,
   // Below this the layout stops shrinking and the page scrolls instead, which
   // is a deliberate floor rather than letting the panels collapse into each other.
   minW: 1180,
