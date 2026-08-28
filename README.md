@@ -48,8 +48,8 @@ Open the interface here: **[e3ve35.github.io/GOMI](https://e3ve35.github.io/GOMI
     <p align="center">
       <img src="images/canvas2.png" style="height: 260px;" >
     </p>
-  - **Writing a note.** Press a dot and it sounds immediately, holding for as long as the mouse is down. Drag to the right and release to give the note a length: the dot stretches into a capsule spanning the columns it covers. A press with no drag makes the shortest possible note.
-  - Hovering an empty dot previews that gesture — the dot brightens and a faint capsule with an arrow shows how far you could drag. It stops short when another note is in the way, so it never offers room you cannot actually take.
+  - **Writing a note.** Press a dot and it sounds immediately, holding for as long as the mouse is down. Drag either way and release to give the note a length: the dot stretches into a capsule spanning the columns it covers, growing from the dot you pressed rather than only to its right. A press with no drag makes the shortest possible note.
+  - Hovering an empty dot previews that gesture — the dot brightens and a faint capsule with an arrow shows how far you could drag rightward. It stops short when another note is in the way, so it never offers room you cannot actually take.
     <p align="center">
       <img src="images/canvas3.png" style="height: 90px;" >
     </p>

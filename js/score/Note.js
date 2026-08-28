@@ -46,6 +46,17 @@ export function remapRows(notes, newRowCount) {
   return [...kept.values()];
 }
 
+// How far left a note anchored at (row, anchorCol) may reach before it would
+// run into the note before it in that row, or off the start of the grid.
+// The mirror of maxLengthFor, for a drag that goes the other way.
+export function minStartFor(notes, row, anchorCol) {
+  let first = 0;
+  for (const n of notes) {
+    if (n.row === row && n.endCol <= anchorCol && n.endCol > first) first = n.endCol;
+  }
+  return first;
+}
+
 // How long the drag hint may show at (row, startCol): the length we would
 // like, clipped to the room that actually exists. Returns 1 when the next
 // cell is taken - the hint must never promise space a drag cannot take.

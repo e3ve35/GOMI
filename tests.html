@@ -14,7 +14,7 @@
       import { scoreDurationSeconds } from "./js/ui/Transport.js";
       import { Scale, SCALES, midiName } from "./js/score/Scale.js";
       import { computeLayout, SPACING } from "./js/config.js";
-      import { Note, noteAt, maxLengthFor, remapRows, ghostLength } from "./js/score/Note.js";
+      import { Note, noteAt, maxLengthFor, minStartFor, remapRows, ghostLength } from "./js/score/Note.js";
       import { headroomLevel, FULL_SCALE_PEAK, VOICE_LEVEL, CLEAN_VOICES } from "./js/audio/Voice.js";
 
       let passed = 0, failed = 0;
@@ -209,6 +209,26 @@
         }
       });
 
+
+      test("minStartFor runs to the grid start with nothing in the way", () => {
+        eq(minStartFor([], 0, 6), 0);
+      });
+
+      test("minStartFor stops at the end of the previous note in the row", () => {
+        eq(minStartFor([new Note(0, 1, 2)], 0, 6), 3);
+      });
+
+      test("minStartFor ignores notes in other rows", () => {
+        eq(minStartFor([new Note(5, 1, 2)], 0, 6), 0);
+      });
+
+      test("minStartFor ignores notes that start later", () => {
+        eq(minStartFor([new Note(0, 8, 2)], 0, 6), 0);
+      });
+
+      test("minStartFor picks the nearest of several earlier notes", () => {
+        eq(minStartFor([new Note(0, 0, 1), new Note(0, 3, 1)], 0, 6), 4);
+      });
 
       test("ghostLength shows the full hint when nothing is in the way", () => {
         eq(ghostLength([], 0, 10, 68, 3), 3);

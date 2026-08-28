@@ -1,5 +1,5 @@
 import { state } from "../state.js";
-import { Note, noteAt, maxLengthFor } from "./Note.js";
+import { Note, noteAt, maxLengthFor, minStartFor } from "./Note.js";
 import { audio } from "../audio/AudioEngine.js";
 
 // The audition sounds for as long as the button is held, so it is only ever
@@ -35,6 +35,9 @@ export function handleMousePressed(event) {
   const note = new Note(row, col, 1, state.radio.value());
   score.notes.push(note);
   state.dragging = note;
+  // The press cell is the anchor, not necessarily the start: a drag that
+  // goes left grows the note back from here instead of doing nothing.
+  state.dragAnchor = col;
   state.auditionHandle = audio.noteOn(score.freqForRow(row), note.waveType);
 }
 
@@ -43,12 +46,18 @@ export function handleMouseDragged() {
   if (!note) return;
   const score = state.score;
   const others = score.notes.filter((n) => n !== note);
-  const max = maxLengthFor(others, note.row, note.startCol, score.cols);
-  const wanted = score.colAt(mouseX) - note.startCol + 1;
-  note.length = Math.max(1, Math.min(wanted, max));
+  const anchor = state.dragAnchor;
+  // The neighbours either side of the anchor bound the drag in both
+  // directions, so a note can never be grown over one by reaching past it.
+  const first = minStartFor(others, note.row, anchor);
+  const last = anchor + maxLengthFor(others, note.row, anchor, score.cols) - 1;
+  const wanted = Math.max(first, Math.min(score.colAt(mouseX), last));
+  note.startCol = Math.min(anchor, wanted);
+  note.length = Math.abs(wanted - anchor) + 1;
 }
 
 export function handleMouseReleased() {
   releaseAudition();
   state.dragging = null;
+  state.dragAnchor = null;
 }
