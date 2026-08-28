@@ -32,6 +32,10 @@ function drawPanelCaptions() {
   pop();
 }
 
+// Below this a bin reads as the analyser's own noise floor rather than
+// anything audible, so it's drawn as silence instead of a stray sliver.
+const SPECTRUM_NOISE_FLOOR = 3;
+
 // I completed part of this function following this tutorial
 // https://www.youtube.com/watch?v=2O3nm0Nvbi4&ab_channel=TheCodingTrain
 function drawSpectrum() {
@@ -40,12 +44,18 @@ function drawSpectrum() {
   translate(box.x, box.y);
 
   var spectrum = fft.analyze();
-  noStroke();
-  fill(COLORS.spectrum);
   var fftWidth = box.w;
   var fftHeight = box.h;
 
+  // A panel outline, matching the envelope's, so this corner has visible
+  // structure even before there is a score - or while nothing is sounding.
+  noStroke();
+  fill(...COLORS.panel);
+  rect(0, 0, fftWidth, fftHeight);
+
+  fill(COLORS.spectrum);
   for (var i = 0; i < spectrum.length; i++) {
+    if (spectrum[i] < SPECTRUM_NOISE_FLOOR) continue;
     var x = map(i, 0, spectrum.length, 0, fftWidth);
     var h = map(spectrum[i], 0, 255, 0, fftHeight);
     rect(x, fftHeight - h, fftWidth / spectrum.length, h);

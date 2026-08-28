@@ -41,7 +41,9 @@ export const SPACING = {
   pad: 26,
   gap: 22,
   headerH: 58,
-  controlsH: 30,
+  // Tall enough that the dropdowns it holds clear the panel captions below
+  // them by more than a sliver.
+  controlsH: 42,
   panelH: 170,
   labelW: 34, // room for the row labels drawn left of the grid
   ampW: 170,
@@ -85,7 +87,7 @@ export function computeLayout(w, h) {
 
   env.graphW = Math.round(env.w * 0.5);
   env.sliderX = env.x + env.graphW + 20;
-  env.labelX = env.sliderX + 58;
+  env.labelX = env.sliderX + 80;
 
   // Measured against the rendered controls; the visual pass pins these
   // widths in CSS so they stop being estimates.
@@ -109,7 +111,7 @@ export function computeLayout(w, h) {
     controls: {
       y: controlsY,
       sliderX: S.pad,
-      labelX: S.pad + 62,
+      labelX: S.pad + 80,
       rootX,
       scaleX,
       radioX,
