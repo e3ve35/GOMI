@@ -116,15 +116,23 @@ export function stopPlayback() {
   state.playing = false;
 }
 
-// The slide a note makes while it sounds. It spans the note's own length, so
-// the pitch lands on its target as the note ends and the whole slide is
-// audible - a ramp reaching to the next note's start would still be running
-// when a note with a gap after it has already been released.
+// How much of a note the slide takes. Bending from the first instant leaves
+// the note no pitch of its own to be heard at - what sounds is one long bend
+// rather than a note going somewhere. Holding for two thirds gives the note
+// time to register before it moves.
+const GLIDE_BEND = 1 / 3;
+
+// The slide a note makes while it sounds: its own pitch for most of its
+// length, then a bend landing on the target as the note ends. Timed to the
+// note rather than to the gap before its target, so the whole slide is
+// audible however far apart the two are.
 export function glideFor(note, score, secondsPerCol) {
   if (!note.glideTo) return undefined;
+  const sounding = note.length * secondsPerCol;
   return {
     freq: score.freqForRow(note.glideTo.row),
-    seconds: note.length * secondsPerCol,
+    hold: sounding * (1 - GLIDE_BEND),
+    seconds: sounding * GLIDE_BEND,
   };
 }
 

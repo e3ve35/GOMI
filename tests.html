@@ -285,12 +285,21 @@
         eq(glideFor(new Note(0, 0, 2), stubScore, 0.5), undefined);
       });
 
-      test("glideFor spans the note's own length, not the gap to its target", () => {
+      test("glideFor holds, then bends, within the note's own length", () => {
         const a = new Note(0, 4, 3);
         a.glideTo = new Note(6, 20, 1);
         const glide = glideFor(a, stubScore, 0.5);
-        eq(glide.seconds, 1.5);
+        close(glide.hold, 1.0);
+        close(glide.seconds, 0.5);
+        close(glide.hold + glide.seconds, 1.5); // the note's own length
         eq(glide.freq, 60);
+      });
+
+      test("glideFor is timed to the note, not the gap before its target", () => {
+        const near = new Note(0, 0, 2), far = new Note(0, 0, 2);
+        near.glideTo = new Note(6, 2, 1);
+        far.glideTo = new Note(6, 40, 1);
+        close(glideFor(near, stubScore, 0.5).seconds, glideFor(far, stubScore, 0.5).seconds);
       });
 
       test("minStartFor runs to the grid start with nothing in the way", () => {

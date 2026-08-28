@@ -47,7 +47,12 @@ export class Voice {
     this.osc.freq(freq);
     // p5 ramps frequency exponentially, which is a constant number of
     // semitones per second - the way a slide between two pitches is heard.
-    if (glide) this.osc.freq(glide.freq, glide.seconds);
+    // Re-scheduling the note's own pitch at the end of the hold is what the
+    // ramp then departs from, so the note sounds before it starts moving.
+    if (glide) {
+      this.osc.freq(freq, 0, glide.hold);
+      this.osc.freq(glide.freq, glide.seconds, glide.hold);
+    }
     this.env.triggerAttack();
     return ++this.token;
   }
