@@ -62,6 +62,10 @@ export const SPACING = {
   minH: 640,
 };
 
+// Measured from the rendered panel: the sliders are 80 wide, and
+// "sustainLevel: 0.5" is the longest label at about 120.
+export const ENV = { gap: 20, sliderW: 80, labelW: 120 };
+
 export function computeLayout(w, h) {
   const S = SPACING;
   w = Math.max(Math.round(w), S.minW);
@@ -90,9 +94,14 @@ export function computeLayout(w, h) {
   const fft = { x: env.x + env.w + S.gap, y: panelY, w: S.fftW, h: S.panelH };
   const buttons = { x: fft.x + fft.w + S.gap, y: panelY, w: S.buttonsW, h: S.panelH };
 
-  env.graphW = Math.round(env.w * 0.5);
-  env.sliderX = env.x + env.graphW + 20;
-  env.labelX = env.sliderX + 80;
+  // The envelope's slider column: a gap, the sliders, then their labels. The
+  // graph takes half the panel, or whatever is left once the column has its
+  // room - at the narrowest window half would not leave enough, and the
+  // labels ran past the panel into the gap beside it.
+  const column = ENV.gap + ENV.sliderW + ENV.labelW;
+  env.graphW = Math.min(Math.round(env.w * 0.5), env.w - column);
+  env.sliderX = env.x + env.graphW + ENV.gap;
+  env.labelX = env.sliderX + ENV.sliderW;
 
   // Measured against the rendered controls; the visual pass pins these
   // widths in CSS so they stop being estimates.

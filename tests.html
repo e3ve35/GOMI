@@ -14,7 +14,7 @@
       import { scoreDurationSeconds, glideFor, soundingSeconds, exportSeconds } from "./js/ui/Transport.js";
       import { encodeWav, fadeOut } from "./js/audio/wav.js";
       import { Scale, SCALES, midiName } from "./js/score/Scale.js";
-      import { computeLayout, SPACING } from "./js/config.js";
+      import { computeLayout, SPACING, ENV } from "./js/config.js";
       import {
         Note, noteAt, maxLengthFor, minStartFor, remapRows, ghostLength,
         glidePair, clearGlidesTo,
@@ -474,12 +474,21 @@
       });
 
       test("the envelope panel keeps room for its slider column", () => {
-        for (const w of [1200, 1280, 1440, 1920]) {
+        for (const w of [SPACING.minW, 1200, 1280, 1440, 1920]) {
           const L = computeLayout(w, 800);
-          if (L.env.labelX + 120 > L.env.x + L.env.w) {
+          if (L.env.labelX + ENV.labelW > L.env.x + L.env.w) {
             throw new Error(`envelope labels overflow its panel at width ${w}`);
           }
         }
+      });
+
+      test("the envelope graph gives up width before its labels do", () => {
+        const tight = computeLayout(SPACING.minW, 800);
+        const roomy = computeLayout(1920, 800);
+        if (tight.env.graphW >= Math.round(tight.env.w * 0.5)) {
+          throw new Error("the graph did not yield to the slider column");
+        }
+        eq(roomy.env.graphW, Math.round(roomy.env.w * 0.5)); // untouched with room
       });
 
       out.innerHTML += `<h2 class="${failed ? "fail" : "pass"}">${passed} passed, ${failed} failed</h2>`;
