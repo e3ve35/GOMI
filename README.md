@@ -68,6 +68,9 @@ Open the interface here: **[e3ve35.github.io/GOMI](https://e3ve35.github.io/GOMI
   - **envelope** (middle) — the [ADSR](https://en.wikipedia.org/wiki/Envelope_(music)) shape applied to every note. The sliders beside it set attack, decay and release times plus attack and sustain levels; adjust them and the next note you play sounds different.
   - **frequency** (right) — a Fourier transform of whatever is sounding right now, showing the amplitude of each frequency component.
 
+  ### An example
+  `examples/falling-water.js` is a short piece written for GOMI: a bass walk under a melody that never re-articulates, leaning from one pitch into the next by glide alone, with single notes dropping above it. Paste it into the browser console with a score open to write it onto the grid. `examples/falling-water.wav` is that score straight out of the **export wav** button.
+
   ### Tools
   - **play** renders your score over time, starting from the leftmost column. Notes light up as they sound, and each one holds for the length you drew.
   - **clear** empties the canvas and stops anything currently playing.
