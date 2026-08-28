@@ -50,6 +50,16 @@ export function handleMouseDragged() {
   const note = state.dragging;
   if (!note) return;
   const score = state.score;
+
+  // Leaving the note's own row turns the drag into a glide: the note keeps
+  // the length it has reached and the link follows the cursor from there.
+  // Coming back to the row resumes lengthening, so neither gesture traps you.
+  if (score.rowAt(mouseY) !== note.row) {
+    state.linking = note;
+    return;
+  }
+  state.linking = null;
+
   const others = score.notes.filter((n) => n !== note);
   const anchor = state.dragAnchor;
   // The neighbours either side of the anchor bound the drag in both
@@ -63,23 +73,29 @@ export function handleMouseDragged() {
 
 export function handleMouseReleased() {
   releaseAudition();
+  // A note the drag itself wrote, rather than one that was already there:
+  // released over nothing it stays as it is, where an existing note would
+  // have its glide cleared.
+  const drawn = state.dragging !== null;
   state.dragging = null;
   state.dragAnchor = null;
-  finishLink();
+  finishLink(drawn);
 }
 
-// A press that began on a note: delete it if the mouse never left it, join it
-// to the note it was dropped on, or - dropped anywhere else - drop the glide
-// it already had, so the same gesture that makes a link also unmakes one.
-function finishLink() {
+// Where a glide drag ended decides what it meant: back on the note it began
+// on, delete it; on another note, join the two; on an empty cell, write the
+// note that was missing; and for a note that was already there, dropping it
+// on nothing clears the glide, so one gesture both makes and unmakes a link.
+function finishLink(drawn) {
   const from = state.linking;
   if (!from) return;
   state.linking = null;
 
   const score = state.score;
-  const target = score.inside(mouseX, mouseY)
-    ? noteAt(score.notes, score.rowAt(mouseY), score.colAt(mouseX))
-    : null;
+  const inside = score.inside(mouseX, mouseY);
+  const row = score.rowAt(mouseY);
+  const col = score.colAt(mouseX);
+  const target = inside ? noteAt(score.notes, row, col) : null;
 
   if (target === from) {
     score.notes.splice(score.notes.indexOf(from), 1);
@@ -87,9 +103,23 @@ function finishLink() {
     return;
   }
 
+  // Dropped on an empty cell after writing a note: write the other end too,
+  // so one gesture makes both notes and the glide between them.
+  if (drawn && !target && inside) {
+    const landed = new Note(row, col, 1, from.waveType);
+    const drawnPair = glidePair(from, landed);
+    if (drawnPair) {
+      score.notes.push(landed);
+      drawnPair.first.glideTo = drawnPair.second;
+    }
+    return;
+  }
+
   const pair = glidePair(from, target);
   if (!pair) {
-    from.glideTo = null;
+    // An existing note dropped on nothing loses the glide it had; a note this
+    // drag wrote never had one to lose.
+    if (!drawn) from.glideTo = null;
     return;
   }
   pair.first.glideTo = pair.second;
