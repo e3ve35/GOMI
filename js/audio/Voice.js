@@ -29,7 +29,7 @@ export class Voice {
   // p5.Envelope.play(unit, startTime, sustainTime) is unusable for this: its
   // body is triggerRelease(t, i + aTime + dTime + ~~n), and ~~n truncates the
   // sustain time to whole seconds, so a 0.5s note would floor to 0.
-  noteOn(freq, waveType, adsr) {
+  noteOn(freq, waveType, adsr, glide) {
     this.env.setADSR(
       adsr.attackTime, adsr.decayTime, adsr.sustainLevel, adsr.releaseTime
     );
@@ -45,6 +45,9 @@ export class Voice {
     this.osc.start();
     this.osc.setType(waveType);
     this.osc.freq(freq);
+    // p5 ramps frequency exponentially, which is a constant number of
+    // semitones per second - the way a slide between two pitches is heard.
+    if (glide) this.osc.freq(glide.freq, glide.seconds);
     this.env.triggerAttack();
     return ++this.token;
   }

@@ -5,6 +5,7 @@ export const state = {
   playing: false,
   dragging: null,
   dragAnchor: null,
+  linking: null,
   auditionHandle: null,
   radio: null,
   envelopePanel: null,

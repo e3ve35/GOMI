@@ -4,6 +4,9 @@ export class Note {
     this.startCol = startCol;
     this.length = length;
     this.waveType = waveType;
+    // The note this one slides into, or null. At most one, so a note has a
+    // single unambiguous pitch to be heading towards while it sounds.
+    this.glideTo = null;
     this.playing = false;
   }
 
@@ -43,7 +46,29 @@ export function remapRows(notes, newRowCount) {
     const prev = kept.get(key);
     if (!prev || n.length > prev.length) kept.set(key, n);
   }
-  return [...kept.values()];
+  const survivors = [...kept.values()];
+  // Clamping drops notes and moves others onto shared rows, so a link that
+  // was legal before the scale changed need not be legal after it.
+  const present = new Set(survivors);
+  for (const n of survivors) {
+    if (!present.has(n.glideTo) || !glidePair(n, n.glideTo)) n.glideTo = null;
+  }
+  return survivors;
+}
+
+// The two notes a glide would join, earliest first, or null if they cannot be
+// joined. Same-row is just a longer note, and notes that overlap in time have
+// no interval to slide across.
+export function glidePair(a, b) {
+  if (!a || !b || a === b || a.row === b.row) return null;
+  const [first, second] = a.startCol <= b.startCol ? [a, b] : [b, a];
+  if (second.startCol < first.endCol) return null;
+  return { first, second };
+}
+
+// A glide into a note that has left the score points at nothing.
+export function clearGlidesTo(notes, removed) {
+  for (const n of notes) if (n.glideTo === removed) n.glideTo = null;
 }
 
 // How far left a note anchored at (row, anchorCol) may reach before it would

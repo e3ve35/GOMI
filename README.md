@@ -53,6 +53,7 @@ Open the interface here: **[e3ve35.github.io/GOMI](https://e3ve35.github.io/GOMI
     <p align="center">
       <img src="images/canvas3.png" style="height: 90px;" >
     </p>
+  - **Gliding between notes.** Press a note and drag onto another one in a different row to join them: a line connects the two, and on playback the earlier note slides in pitch across its whole span so it arrives at the second note's pitch exactly as that note begins. Notes in the same row, or that overlap in time, cannot be joined. Dragging from a note onto empty space removes the glide it had.
   - **Erasing.** Click a note again to remove it. Clicking anywhere along a long note removes the whole note.
   - **Wave type.** Choose between sine, triangle, sawtooth, and square. Each colours its notes differently on the canvas: sine is white, triangle green, sawtooth teal, and square blue — so you can read the arrangement at a glance.
   - **Root and scale.** Two dropdowns beside the wave selector set the root note and the scale (major, minor, dorian, major pentatonic, minor pentatonic). Changing either re-tunes the whole grid. Your notes keep their positions and are re-pitched into the new scale, so switching from major to minor transposes what you have written rather than discarding it.

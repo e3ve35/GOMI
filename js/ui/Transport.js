@@ -116,6 +116,16 @@ export function stopPlayback() {
   state.playing = false;
 }
 
+// The slide a note makes while it sounds: it arrives at the linked note's
+// pitch exactly as that note begins, so the two run into each other.
+export function glideFor(note, score, secondsPerCol) {
+  if (!note.glideTo) return undefined;
+  return {
+    freq: score.freqForRow(note.glideTo.row),
+    seconds: (note.glideTo.startCol - note.startCol) * secondsPerCol,
+  };
+}
+
 export function playScore() {
   const score = state.score;
   if (!score || state.playing) return;
@@ -127,7 +137,9 @@ export function playScore() {
       setTimeout(() => {
         // The note may have been deleted between scheduling and firing.
         if (!score.notes.includes(note)) return;
-        const handle = audio.noteOn(score.freqForRow(note.row), note.waveType);
+        const handle = audio.noteOn(
+          score.freqForRow(note.row), note.waveType, glideFor(note, score, spc)
+        );
         sounding.push(handle);
         note.playing = true;
         scheduled.push(

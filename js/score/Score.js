@@ -1,6 +1,7 @@
 import { COLORS, GRID, colorForWave } from "../config.js";
 import { Scale } from "./Scale.js";
 import { noteAt, ghostLength } from "./Note.js";
+import { state } from "../state.js";
 
 export class Score {
   constructor(layout, scale = new Scale()) {
@@ -131,6 +132,8 @@ export class Score {
       ellipse(this.cellX(hovered.col), this.cellY(hovered.row), hd, hd);
     }
 
+    this.drawGlides();
+
     // Notes as capsules. At length 1 the width equals dotSize, so the note
     // renders as a circle identical to a background dot.
     rectMode(CORNER);
@@ -143,6 +146,34 @@ export class Score {
 
     this.collide();
     pop();
+  }
+
+  // Glides, drawn under the capsules so the notes cap their ends and the
+  // three read as one connected shape. Half the dot's weight: present, but
+  // clearly the join rather than a note in its own right.
+  drawGlides() {
+    const d = GRID.dotSize;
+    push();
+    noFill();
+    strokeCap(ROUND);
+    strokeWeight(d / 2);
+    for (const note of this.notes) {
+      if (!note.glideTo) continue;
+      stroke(colorForWave(note.waveType));
+      this.glideLine(note, this.cellX(note.glideTo.startCol), this.cellY(note.glideTo.row));
+    }
+    // The link being dragged, which has no target until the mouse is let go.
+    if (state.linking) {
+      stroke(colorForWave(state.linking.waveType));
+      this.glideLine(state.linking, mouseX, mouseY);
+    }
+    pop();
+  }
+
+  // From the tail of a note's capsule to wherever it is heading.
+  glideLine(note, toX, toY) {
+    const tail = note.startCol + note.length - 1;
+    line(this.cellX(tail), this.cellY(note.row), toX, toY);
   }
 
   collide() {

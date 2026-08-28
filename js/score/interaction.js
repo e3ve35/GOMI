@@ -1,5 +1,7 @@
 import { state } from "../state.js";
-import { Note, noteAt, maxLengthFor, minStartFor } from "./Note.js";
+import {
+  Note, noteAt, maxLengthFor, minStartFor, glidePair, clearGlidesTo,
+} from "./Note.js";
 import { audio } from "../audio/AudioEngine.js";
 
 // The audition sounds for as long as the button is held, so it is only ever
@@ -27,8 +29,11 @@ export function handleMousePressed(event) {
   const col = score.colAt(mouseX);
 
   const hit = noteAt(score.notes, row, col);
+  // Pressing a note starts a link rather than deleting it outright: where the
+  // press ends decides between the two. Deleting therefore happens on the way
+  // up, which for a plain click is the same gesture it always was.
   if (hit) {
-    score.notes.splice(score.notes.indexOf(hit), 1);
+    state.linking = hit;
     return;
   }
 
@@ -60,4 +65,32 @@ export function handleMouseReleased() {
   releaseAudition();
   state.dragging = null;
   state.dragAnchor = null;
+  finishLink();
+}
+
+// A press that began on a note: delete it if the mouse never left it, join it
+// to the note it was dropped on, or - dropped anywhere else - drop the glide
+// it already had, so the same gesture that makes a link also unmakes one.
+function finishLink() {
+  const from = state.linking;
+  if (!from) return;
+  state.linking = null;
+
+  const score = state.score;
+  const target = score.inside(mouseX, mouseY)
+    ? noteAt(score.notes, score.rowAt(mouseY), score.colAt(mouseX))
+    : null;
+
+  if (target === from) {
+    score.notes.splice(score.notes.indexOf(from), 1);
+    clearGlidesTo(score.notes, from);
+    return;
+  }
+
+  const pair = glidePair(from, target);
+  if (!pair) {
+    from.glideTo = null;
+    return;
+  }
+  pair.first.glideTo = pair.second;
 }

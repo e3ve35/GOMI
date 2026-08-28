@@ -14,7 +14,10 @@
       import { scoreDurationSeconds } from "./js/ui/Transport.js";
       import { Scale, SCALES, midiName } from "./js/score/Scale.js";
       import { computeLayout, SPACING } from "./js/config.js";
-      import { Note, noteAt, maxLengthFor, minStartFor, remapRows, ghostLength } from "./js/score/Note.js";
+      import {
+        Note, noteAt, maxLengthFor, minStartFor, remapRows, ghostLength,
+        glidePair, clearGlidesTo,
+      } from "./js/score/Note.js";
       import { headroomLevel, FULL_SCALE_PEAK, VOICE_LEVEL, CLEAN_VOICES } from "./js/audio/Voice.js";
 
       let passed = 0, failed = 0;
@@ -209,6 +212,72 @@
         }
       });
 
+
+      test("glidePair orders the two notes earliest first", () => {
+        const a = new Note(0, 8, 1), b = new Note(3, 2, 1);
+        const pair = glidePair(a, b);
+        eq(pair.first, b);
+        eq(pair.second, a);
+      });
+
+      test("glidePair refuses two notes in the same row", () => {
+        eq(glidePair(new Note(0, 0, 1), new Note(0, 4, 1)), null);
+      });
+
+      test("glidePair refuses a note joined to itself", () => {
+        const a = new Note(0, 0, 1);
+        eq(glidePair(a, a), null);
+      });
+
+      test("glidePair refuses notes that overlap in time", () => {
+        eq(glidePair(new Note(0, 0, 5), new Note(3, 2, 1)), null);
+      });
+
+      test("glidePair allows a note starting exactly where the first ends", () => {
+        const a = new Note(0, 0, 2), b = new Note(3, 2, 1);
+        eq(glidePair(a, b).second, b);
+      });
+
+      test("glidePair refuses a missing partner", () => {
+        eq(glidePair(new Note(0, 0, 1), null), null);
+      });
+
+      test("clearGlidesTo drops every link into the removed note", () => {
+        const gone = new Note(0, 4, 1);
+        const a = new Note(1, 0, 1), b = new Note(2, 0, 1), c = new Note(3, 0, 1);
+        a.glideTo = gone;
+        b.glideTo = gone;
+        c.glideTo = a;
+        clearGlidesTo([a, b, c], gone);
+        eq(a.glideTo, null);
+        eq(b.glideTo, null);
+        eq(c.glideTo, a);
+      });
+
+      test("remapRows drops a glide to a note that clamping removed", () => {
+        const a = new Note(0, 0, 1);
+        const b = new Note(9, 4, 1);
+        a.glideTo = b;
+        const kept = remapRows([a, b, new Note(9, 4, 3)], 5);
+        eq(kept.length, 2);
+        eq(a.glideTo, null);
+      });
+
+      test("remapRows drops a glide that clamping folded onto one row", () => {
+        const a = new Note(6, 0, 1);
+        const b = new Note(9, 4, 1);
+        a.glideTo = b;
+        remapRows([a, b], 5);
+        eq(a.glideTo, null);
+      });
+
+      test("remapRows keeps a glide that is still legal", () => {
+        const a = new Note(0, 0, 1);
+        const b = new Note(3, 4, 1);
+        a.glideTo = b;
+        remapRows([a, b], 5);
+        eq(a.glideTo, b);
+      });
 
       test("minStartFor runs to the grid start with nothing in the way", () => {
         eq(minStartFor([], 0, 6), 0);

@@ -25,12 +25,14 @@ class AudioEngine {
     this.adsr = adsr;
   }
 
-  noteOn(freq, waveType) {
+  // `glide`, when given, is { freq, seconds }: the pitch this note slides to
+  // and how long it takes to arrive.
+  noteOn(freq, waveType, glide) {
     this.resume();
     let oldest = this.voices[0];
     for (const v of this.voices) if (v.lastUsed < oldest.lastUsed) oldest = v;
     oldest.lastUsed = ++this.counter;
-    return { voice: oldest, token: oldest.noteOn(freq, waveType, this.adsr) };
+    return { voice: oldest, token: oldest.noteOn(freq, waveType, this.adsr, glide) };
   }
 
   noteOff(handle) {
