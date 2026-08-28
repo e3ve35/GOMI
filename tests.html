@@ -11,7 +11,7 @@
     <div id="out"></div>
     <script type="module">
       import { toNyquist } from "./js/nyquist.js";
-      import { scoreDurationSeconds } from "./js/ui/Transport.js";
+      import { scoreDurationSeconds, glideFor } from "./js/ui/Transport.js";
       import { Scale, SCALES, midiName } from "./js/score/Scale.js";
       import { computeLayout, SPACING } from "./js/config.js";
       import {
@@ -277,6 +277,20 @@
         a.glideTo = b;
         remapRows([a, b], 5);
         eq(a.glideTo, b);
+      });
+
+      const stubScore = { freqForRow: (row) => row * 10 };
+
+      test("glideFor is nothing for a note with no glide", () => {
+        eq(glideFor(new Note(0, 0, 2), stubScore, 0.5), undefined);
+      });
+
+      test("glideFor spans the note's own length, not the gap to its target", () => {
+        const a = new Note(0, 4, 3);
+        a.glideTo = new Note(6, 20, 1);
+        const glide = glideFor(a, stubScore, 0.5);
+        eq(glide.seconds, 1.5);
+        eq(glide.freq, 60);
       });
 
       test("minStartFor runs to the grid start with nothing in the way", () => {

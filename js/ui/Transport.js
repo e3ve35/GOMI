@@ -116,13 +116,15 @@ export function stopPlayback() {
   state.playing = false;
 }
 
-// The slide a note makes while it sounds: it arrives at the linked note's
-// pitch exactly as that note begins, so the two run into each other.
+// The slide a note makes while it sounds. It spans the note's own length, so
+// the pitch lands on its target as the note ends and the whole slide is
+// audible - a ramp reaching to the next note's start would still be running
+// when a note with a gap after it has already been released.
 export function glideFor(note, score, secondsPerCol) {
   if (!note.glideTo) return undefined;
   return {
     freq: score.freqForRow(note.glideTo.row),
-    seconds: (note.glideTo.startCol - note.startCol) * secondsPerCol,
+    seconds: note.length * secondsPerCol,
   };
 }
 
