@@ -289,8 +289,8 @@
         const a = new Note(0, 4, 3);
         a.glideTo = new Note(6, 20, 1);
         const glide = glideFor(a, stubScore, 0.5);
-        close(glide.hold, 1.0);
-        close(glide.seconds, 0.5);
+        close(glide.hold, 0.75);
+        close(glide.seconds, 0.75);
         close(glide.hold + glide.seconds, 1.5); // the note's own length
         eq(glide.freq, 60);
       });

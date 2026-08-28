@@ -118,9 +118,9 @@ export function stopPlayback() {
 
 // How much of a note the slide takes. Bending from the first instant leaves
 // the note no pitch of its own to be heard at - what sounds is one long bend
-// rather than a note going somewhere. Holding for two thirds gives the note
-// time to register before it moves.
-const GLIDE_BEND = 1 / 3;
+// rather than a note going somewhere - so the note holds first. Half and half
+// is short enough to register as a pitch and long enough to hear it leave.
+const GLIDE_BEND = 1 / 2;
 
 // The slide a note makes while it sounds: its own pitch for most of its
 // length, then a bend landing on the target as the note ends. Timed to the
