@@ -116,23 +116,31 @@ export function stopPlayback() {
   state.playing = false;
 }
 
-// How much of a note the slide takes. Bending from the first instant leaves
-// the note no pitch of its own to be heard at - what sounds is one long bend
-// rather than a note going somewhere - so the note holds first. Half and half
-// is short enough to register as a pitch and long enough to hear it leave.
+// The least of a glide that is the bend itself. Two notes written side by
+// side leave no gap to slide across, and a tie with no bend in it is not a
+// glide at all, so the bend takes half of even the shortest one.
 const GLIDE_BEND = 1 / 2;
 
-// The slide a note makes while it sounds: its own pitch for most of its
-// length, then a bend landing on the target as the note ends. Timed to the
-// note rather than to the gap before its target, so the whole slide is
-// audible however far apart the two are.
+// How long a note sounds. A glide ties it to the note it leads into: it holds
+// until that note begins, so the further apart the two are dragged, the
+// longer the slide between them.
+export function soundingSeconds(note, secondsPerCol) {
+  const cols = note.glideTo ? note.glideTo.startCol - note.startCol : note.length;
+  return cols * secondsPerCol;
+}
+
+// The slide a note makes while it sounds: its own pitch first, then a bend
+// landing on the target as that note begins. The note's drawn length says
+// where the bend starts, so lengthening a note delays its slide - except
+// where the two sit too close for that to leave a bend worth hearing.
 export function glideFor(note, score, secondsPerCol) {
   if (!note.glideTo) return undefined;
-  const sounding = note.length * secondsPerCol;
+  const tied = soundingSeconds(note, secondsPerCol);
+  const bend = Math.max(tied - note.length * secondsPerCol, tied * GLIDE_BEND);
   return {
     freq: score.freqForRow(note.glideTo.row),
-    hold: sounding * (1 - GLIDE_BEND),
-    seconds: sounding * GLIDE_BEND,
+    hold: tied - bend,
+    seconds: bend,
   };
 }
 
@@ -158,7 +166,7 @@ export function playScore() {
             const i = sounding.indexOf(handle);
             if (i !== -1) sounding.splice(i, 1);
             note.playing = false;
-          }, note.length * spc * 1000)
+          }, soundingSeconds(note, spc) * 1000)
         );
       }, note.startCol * spc * 1000)
     );

@@ -11,7 +11,7 @@
     <div id="out"></div>
     <script type="module">
       import { toNyquist } from "./js/nyquist.js";
-      import { scoreDurationSeconds, glideFor } from "./js/ui/Transport.js";
+      import { scoreDurationSeconds, glideFor, soundingSeconds } from "./js/ui/Transport.js";
       import { Scale, SCALES, midiName } from "./js/score/Scale.js";
       import { computeLayout, SPACING } from "./js/config.js";
       import {
@@ -285,21 +285,41 @@
         eq(glideFor(new Note(0, 0, 2), stubScore, 0.5), undefined);
       });
 
-      test("glideFor holds, then bends, within the note's own length", () => {
+      test("a note without a glide sounds for its drawn length", () => {
+        close(soundingSeconds(new Note(0, 4, 3), 0.5), 1.5);
+      });
+
+      test("a glide ties the note through to the one it leads into", () => {
+        const a = new Note(0, 4, 3);
+        a.glideTo = new Note(6, 20, 1);
+        close(soundingSeconds(a, 0.5), 8); // cols 4 to 20, not the drawn 3
+      });
+
+      test("glideFor bends across the gap, holding for the note's own length", () => {
         const a = new Note(0, 4, 3);
         a.glideTo = new Note(6, 20, 1);
         const glide = glideFor(a, stubScore, 0.5);
-        close(glide.hold, 0.75);
-        close(glide.seconds, 0.75);
-        close(glide.hold + glide.seconds, 1.5); // the note's own length
+        close(glide.hold, 1.5);    // the drawn length
+        close(glide.seconds, 6.5); // the rest of the way to the target
+        close(glide.hold + glide.seconds, 8);
         eq(glide.freq, 60);
       });
 
-      test("glideFor is timed to the note, not the gap before its target", () => {
+      test("the further apart the notes, the longer the bend", () => {
         const near = new Note(0, 0, 2), far = new Note(0, 0, 2);
-        near.glideTo = new Note(6, 2, 1);
+        near.glideTo = new Note(6, 4, 1);
         far.glideTo = new Note(6, 40, 1);
-        close(glideFor(near, stubScore, 0.5).seconds, glideFor(far, stubScore, 0.5).seconds);
+        if (glideFor(far, stubScore, 0.5).seconds <= glideFor(near, stubScore, 0.5).seconds) {
+          throw new Error("a distant target did not lengthen the bend");
+        }
+      });
+
+      test("touching notes still bend over half the tie", () => {
+        const a = new Note(0, 4, 3);
+        a.glideTo = new Note(6, 7, 1); // starts exactly where a ends: no gap
+        const glide = glideFor(a, stubScore, 0.5);
+        close(glide.hold, 0.75);
+        close(glide.seconds, 0.75);
       });
 
       test("minStartFor runs to the grid start with nothing in the way", () => {
