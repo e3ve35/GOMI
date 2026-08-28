@@ -1,6 +1,6 @@
 import { Score } from "../score/Score.js";
 import { toNyquist, downloadText } from "../nyquist.js";
-import { COLORS, colorForWave } from "../config.js";
+import { colorForWave } from "../config.js";
 import { state } from "../state.js";
 import { Scale, SCALES, midiName } from "../score/Scale.js";
 import { remapRows } from "../score/Note.js";
@@ -51,10 +51,14 @@ export function createTransport() {
 
   // wave type
   state.radio = createRadio();
-  ["sine", "triangle", "sawtooth", "square"].forEach((w) => state.radio.option(w));
+  ["sine", "triangle", "sawtooth", "square"].forEach((w) => {
+    // p5 wraps each option as <label><input><span>name</span></label>, so
+    // colouring the label tints that one option's text. Every option carries
+    // the colour its notes will take, rather than the whole row restating
+    // the current selection.
+    state.radio.option(w).parentElement.style.color = colorForWave(w);
+  });
   state.radio.selected("sine");
-  state.radio.style("color", COLORS.sine);
-  state.radio.changed(changeRadio);
   hideUntilScore(state.radio);
 
   rootSelect = transportSelect(
@@ -162,12 +166,6 @@ function changeScale() {
   score.scale = new Scale(Number(rootSelect.value()), scaleSelect.value(), 3);
   score.refit();
   score.notes = remapRows(score.notes, score.scale.rowCount);
-}
-
-// Tint the selector with the colour its notes will take, instead of the
-// translucent block that used to sit behind it.
-function changeRadio() {
-  state.radio.style("color", colorForWave(state.radio.value()));
 }
 
 export function generateScore() {
